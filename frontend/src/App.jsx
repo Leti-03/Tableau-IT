@@ -756,15 +756,7 @@ function Whiteboard({
     } else if (t.includes("finance") || id.includes("finance")) {
       return renderFinanceDashboard();
     }
-    return (
-      <div style={{ 
-        marginTop: 20, height: 180, border: "1px dashed #cbd5e1", borderRadius: 12, 
-        display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", 
-        fontSize: 13, background: "#fafafa", fontFamily: "cursive, sans-serif" 
-      }}>
-        Double-cliquez pour ajouter des notes ou parlez au micro.
-      </div>
-    );
+    return null;
   };
 
   return (
