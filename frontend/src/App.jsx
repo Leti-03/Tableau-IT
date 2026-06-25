@@ -10,7 +10,7 @@ const defaultCourse = {
   id: "photosynthesis-default",
   title: "La photosynthèse",
   description: "Commencer à écrire ou parlez au micro...",
-  descColor: "#2563eb",
+  descColor: "#16a34a",
   pointsCles: [
     "Les plantes absorbent la lumière",
     "Elles utilisent le CO₂ et l'eau",
@@ -19,7 +19,9 @@ const defaultCourse = {
   ],
   question: "Pourquoi la lumière est-elle essentielle à la photosynthèse ?",
   aiSummary: "La photosynthèse est le processus par lequel les plantes utilisent la lumière, le CO₂ et l'eau pour produire du sucre et libérer de l'oxygène.",
-  cards: []
+  cards: [],
+  dateLabel: "Aujourd'hui",
+  timeLabel: "10:45"
 };
 
 const swotCourse = {
@@ -33,29 +35,37 @@ const swotCourse = {
     "Vision claire de la stratégie",
     "Anticipation des risques et opportunités"
   ],
+  swotBullets: [
+    { type: "force", label: "Force :", text: "Les forces sont les atouts internes qui donnent à l'organisation un avantage concurrentiel. Elles représentent ce que l'entreprise fait bien et qui la distingue de ses concurrents.", color: "#16a34a" },
+    { type: "faiblesse", label: "Faiblesse :", text: "Les faiblesses sont les points internes à améliorer. Elles peuvent limiter la performance de l'organisation et doivent être identifiées pour être corrigées.", color: "#ea580c" },
+    { type: "opportunite", label: "Opportunité :", text: "Les opportunités sont les éléments externes favorables à l'organisation. Elles proviennent de l'environnement et peuvent être exploitées pour favoriser la croissance et le succès.", color: "#2563eb" },
+    { type: "menace", label: "Menace :", text: "Les menaces sont des éléments externes défavorables qui peuvent nuire à l'organisation. Les anticiper permet de réduire leur impact et de mieux s'y préparer.", color: "#9333ea" }
+  ],
   aiSummary: "L'analyse SWOT structure les forces, faiblesses, opportunités et menaces pour orienter les décisions d'entreprise.",
   cards: [
     {
-      id: "swot-force-card",
+      id: "swot-ex-card",
       type: "notes_cours",
-      title: "Force :",
-      content: "Les forces sont les atouts internes qui donnent à l'organisation un avantage concurrentiel.",
-      x: 100,
+      title: "Exemple d'application",
+      content: "L'analyse SWOT aide à élaborer une stratégie adaptée en s'appuyant sur les forces, en corrigeant les faiblesses, en saisissant les opportunités et en anticipant les menaces.",
+      x: 520,
       y: 350,
       isPinned: true,
-      color: "#16a34a"
+      color: "#3b82f6"
     },
     {
-      id: "swot-faiblesse-card",
-      type: "notes_cours",
-      title: "Faiblesse :",
-      content: "Les faiblesses sont les points internes à améliorer. Elles peuvent limiter la performance.",
-      x: 100,
+      id: "swot-q-card",
+      type: "question",
+      title: "Question",
+      content: "Comment utiliser l'analyse SWOT pour améliorer la performance d'une entreprise ?",
+      x: 520,
       y: 535,
       isPinned: true,
-      color: "#ea580c"
+      color: "#a855f7"
     }
-  ]
+  ],
+  dateLabel: "Aujourd'hui",
+  timeLabel: "10:45"
 };
 
 const pestelCourse = {
@@ -69,7 +79,41 @@ const pestelCourse = {
     "Anticipation des grandes tendances"
   ],
   aiSummary: "Le modèle PESTEL classe les influences externes en 6 catégories majeures pour aider à anticiper les évolutions du marché.",
-  cards: []
+  cards: [],
+  dateLabel: "Hier",
+  timeLabel: "16:30"
+};
+
+const porterCourse = {
+  id: "porter-default",
+  title: "Les 5 forces de Porter",
+  description: "Le modèle des 5 forces de Porter permet d'analyser l'environnement concurrentiel d'une entreprise en identifiant les forces qui déterminent l'intensité de la concurrence et l'attractivité d'un marché.",
+  descColor: "#ea580c",
+  pointsCles: [
+    "Analyse de la structure concurrentielle",
+    "Identification des menaces du marché",
+    "Définition d'un avantage concurrentiel"
+  ],
+  aiSummary: "Le modèle des 5 forces de Porter structure l'analyse de l'intensité concurrentielle selon 5 axes majeurs : clients, fournisseurs, entrants, substituts et rivaux.",
+  cards: [],
+  dateLabel: "Hier",
+  timeLabel: "11:20"
+};
+
+const financeCourse = {
+  id: "finance-default",
+  title: "Analyse financière",
+  description: "L'analyse financière permet d'évaluer la santé financière d'une entreprise, sa rentabilité et sa solvabilité à partir des documents comptables (bilan, compte de résultat).",
+  descColor: "#ca8a04",
+  pointsCles: [
+    "Solvabilité et liquidité de l'entreprise",
+    "Étude de la rentabilité d'exploitation",
+    "Analyse de la structure financière"
+  ],
+  aiSummary: "L'analyse financière évalue la rentabilité, la solvabilité et la structure financière d'une entreprise pour orienter les décisions d'investissement.",
+  cards: [],
+  dateLabel: "Avant-hier",
+  timeLabel: "10:15"
 };
 
 // ── Profile Local Storage Helpers ────────────────────────────────────────────
@@ -77,17 +121,14 @@ function getProfiles() {
   try {
     const data = localStorage.getItem("ideagrid_profiles");
     if (!data) {
-      // Default mock profiles from the screenshot
-      const defaultProfiles = [
-        { id: "profile-1", firstName: "Aghiles", lastName: "ALKAMA", email: "alkama.aghiles@example.com", color: "#22c55e", lastActive: "Aujourd'hui à 10:15" },
-        { id: "profile-2", firstName: "Amina", lastName: "SMADI", email: "smadi.amina@example.com", color: "#ea580c", lastActive: "Hier à 16:40" },
-        { id: "profile-3", firstName: "samir", lastName: "ARHAB", email: "arhab.samir@example.com", color: "#3b82f6", lastActive: "Hier à 14:22" },
-        { id: "profile-4", firstName: "abdnour", lastName: "KHAMES", email: "khames.abdnour@example.com", color: "#a855f7", lastActive: "07/05/2024 à 09:30" }
-      ];
-      localStorage.setItem("ideagrid_profiles", JSON.stringify(defaultProfiles));
-      return defaultProfiles;
+      return [];
     }
-    return JSON.parse(data);
+    const list = JSON.parse(data);
+    const filtered = list.filter(p => p.id !== "profile-1" && p.id !== "profile-2" && p.id !== "profile-3" && p.id !== "profile-4");
+    if (filtered.length !== list.length) {
+      localStorage.setItem("ideagrid_profiles", JSON.stringify(filtered));
+    }
+    return filtered;
   } catch {
     return [];
   }
@@ -109,10 +150,26 @@ function getCours(profileId) {
         return [swotCourse];
       } else if (profileId === "profile-3") {
         return [pestelCourse];
+      } else if (profileId === "profile-4") {
+        return [porterCourse, financeCourse];
       }
-      return [defaultCourse];
+      
+      // Default for newly created users
+      const userDefault = {
+        id: "course-" + genId(),
+        title: "Nouveau cours",
+        description: "Commencer à écrire ou parlez au micro...",
+        descColor: "#0f172a",
+        pointsCles: ["Premier point clé..."],
+        question: "Entrez votre question clé ici...",
+        aiSummary: "L'assistant IA résumera le cours.",
+        cards: [],
+        dateLabel: "Aujourd'hui",
+        timeLabel: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+      };
+      return [userDefault];
     }
-    // Clean photosynthesis-default if still populated with old template description
+    
     let list = JSON.parse(data);
     list = list.map(c => {
       if (c.id === "photosynthesis-default" && !c.description.includes("Commencer à écrire")) {
@@ -308,6 +365,46 @@ function AssistantPanel({ onClose, aiSummary, onSuggestAction, onSendMessage }) 
   );
 }
 
+// ── Profile Avatar Vector SVG Renderer ───────────────────────────────────────
+function ProfileAvatar({ profile, size = 60 }) {
+  if (!profile) return null;
+  const isGuest = profile.id === "guest";
+  if (isGuest) {
+    return (
+      <div style={{
+        width: size, height: size, borderRadius: "50%", background: "#f1f5f9", color: "#64748b",
+        display: "flex", alignItems: "center", justifyContent: "center", fontSize: size * 0.45,
+        border: "1.5px solid #cbd5e1", flexShrink: 0, fontWeight: 600
+      }}>
+        👤
+      </div>
+    );
+  }
+
+  const initials = ((profile.firstName?.[0] || "") + (profile.lastName?.[0] || "")).toUpperCase();
+  const themeColor = profile.color || "#3b82f6";
+  
+  return (
+    <div style={{
+      width: size,
+      height: size,
+      borderRadius: "50%",
+      background: `${themeColor}12`,
+      border: `2px solid ${themeColor}20`,
+      color: themeColor,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: size * 0.4,
+      fontWeight: 700,
+      fontFamily: "'Inter', sans-serif",
+      flexShrink: 0
+    }}>
+      {initials}
+    </div>
+  );
+}
+
 // ── Main Board Canvas ─────────────────────────────────────────────────────────
 function Whiteboard({ 
   course, 
@@ -331,7 +428,9 @@ function Whiteboard({
   onPointerDown,
   draggingCard,
   onSave,
-  onShare
+  onShare,
+  activeProfile,
+  onUpdateSwotBullet
 }) {
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDesc, setEditingDesc] = useState(false);
@@ -339,8 +438,10 @@ function Whiteboard({
   const [editingCardId, setEditingCardId] = useState(null);
   const [showToolbar, setShowToolbar] = useState(true);
   const [tempDesc, setTempDesc] = useState("");
+  
+  const [editingSwotIdx, setEditingSwotIdx] = useState(null);
+  const [tempSwotText, setTempSwotText] = useState("");
 
-  // Helper to get formatted local time
   const [localTime, setLocalTime] = useState("");
   useEffect(() => {
     const updateTime = () => {
@@ -368,15 +469,283 @@ function Whiteboard({
   );
 
   // Live text calculation that incorporates interim speech recognition in real-time
-  const displayDescription = course.description === "Commencer à écrire ou parlez au micro..."
-    ? (speechText ? speechText : "Commencer à écrire ou parlez au micro...")
-    : course.description + (speechText ? " " + speechText : "");
+  const displayDescription = () => {
+    const isPlaceholder = course.description === "Commencer à écrire ou parlez au micro...";
+    
+    if (isPlaceholder) {
+      if (speechText) {
+        return (
+          <span style={{ fontStyle: "italic", opacity: 0.7, color: selectedColor }}>
+            {speechText}
+          </span>
+        );
+      }
+      return (
+        <span style={{ opacity: 0.5, color: "#64748b" }}>
+          Commencer à écrire ou parlez au micro...
+        </span>
+      );
+    }
+    
+    return (
+      <>
+        <span>{course.description}</span>
+        {speechText && (
+          <span style={{ fontStyle: "italic", opacity: 0.7, color: selectedColor }}>
+            {" " + speechText}
+          </span>
+        )}
+      </>
+    );
+  };
+
+  // Diagram 1: Photosynthesis
+  const renderPlantDiagram = () => (
+    <div style={{ position: "relative", marginTop: 20, padding: 20, height: 320, border: "1px dashed #cbd5e1", borderRadius: 12, background: "#fcfdfa" }}>
+      <div style={{ position: "absolute", top: 15, left: 20, textAlign: "center" }}>
+        <span style={{ fontSize: 44, filter: "drop-shadow(0 2px 4px rgba(253,224,71,0.5))" }}>☀️</span>
+        <div style={{ color: "#eab308", fontSize: 12, fontFamily: "cursive, sans-serif", fontWeight: 600 }}>Lumière</div>
+      </div>
+      <div style={{ position: "absolute", bottom: 120, left: 20, fontSize: 13, fontFamily: "cursive, sans-serif" }}>
+        CO₂ <br /> <span style={{ fontSize: 11, color: "#64748b" }}>(Dioxyde de carbone)</span> ➔
+      </div>
+      <div style={{ position: "absolute", bottom: 30, left: 30, fontSize: 13, fontFamily: "cursive, sans-serif", color: "#2563eb" }}>
+        Eau (H₂O) ➔
+      </div>
+      <div style={{ textAlign: "center", marginTop: 60 }}>
+        <span style={{ fontSize: 90, filter: "drop-shadow(0 4px 8px rgba(34,197,94,0.3))" }}>🌱</span>
+      </div>
+      <div style={{ position: "absolute", top: 40, right: 30, fontSize: 13, fontFamily: "cursive, sans-serif", color: "#16a34a" }}>
+        ➔ O₂ <br /> <span style={{ fontSize: 11, color: "#64748b" }}>(Oxygène)</span>
+      </div>
+      <div style={{ position: "absolute", bottom: 80, right: 30, fontSize: 13, fontFamily: "cursive, sans-serif", color: "#9333ea" }}>
+        🪟 Sucre <br /> <span style={{ fontSize: 11, color: "#64748b" }}>(Glucose)</span>
+      </div>
+    </div>
+  );
+
+  // Diagram 2: SWOT Bullets (editable inline)
+  const renderSwotBullets = () => {
+    const bullets = course.swotBullets || [
+      { type: "force", label: "Force :", text: "Les forces sont les atouts internes qui donnent à l'organisation un avantage concurrentiel.", color: "#16a34a" },
+      { type: "faiblesse", label: "Faiblesse :", text: "Les faiblesses sont les points internes à améliorer. Elles peuvent limiter la performance.", color: "#ea580c" },
+      { type: "opportunite", label: "Opportunité :", text: "Les opportunités sont les éléments externes favorables.", color: "#2563eb" },
+      { type: "menace", label: "Menace :", text: "Les menaces sont des éléments externes défavorables.", color: "#9333ea" }
+    ];
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 15, fontFamily: "cursive, sans-serif" }}>
+        {bullets.map((b, idx) => (
+          <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+            <span style={{ 
+              display: "inline-block", width: 10, height: 10, borderRadius: "50%", 
+              background: b.color, marginTop: 7, flexShrink: 0 
+            }} />
+            <div style={{ flex: 1, fontSize: 15, lineHeight: 1.5 }}>
+              <span style={{ color: b.color, fontWeight: 700, marginRight: 6 }}>{b.label}</span>
+              {editingSwotIdx === idx ? (
+                <textarea
+                  value={tempSwotText}
+                  onChange={(e) => setTempSwotText(e.target.value)}
+                  onBlur={() => {
+                    setEditingSwotIdx(null);
+                    if (onUpdateSwotBullet) {
+                      onUpdateSwotBullet(idx, tempSwotText.trim());
+                    }
+                  }}
+                  autoFocus
+                  style={{
+                    width: "100%", height: 60, fontFamily: "cursive, sans-serif", fontSize: 15,
+                    border: "1px solid #cbd5e1", borderRadius: 6, outline: "none", background: "#f8fafc",
+                    padding: 6
+                  }}
+                />
+              ) : (
+                <span 
+                  onClick={() => {
+                    setEditingSwotIdx(idx);
+                    setTempSwotText(b.text);
+                  }}
+                  title="Double-cliquer pour modifier le texte"
+                  style={{ cursor: "pointer" }}
+                >
+                  {b.text || "Double-cliquez pour écrire..."}
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Diagram 3: PESTEL Layout
+  const renderPestelDiagram = () => {
+    const pillars = [
+      { letter: "P", label: "Politique", color: "#3b82f6", text: "Stabilité gouvernementale, fiscalité" },
+      { letter: "E", label: "Économique", color: "#3b82f6", text: "Croissance, taux d'intérêt, inflation" },
+      { letter: "S", label: "Social", color: "#ea580c", text: "Démographie, modes de vie, éducation" },
+      { letter: "T", label: "Technologique", color: "#ea580c", text: "Innovation, R&D, numérisation" },
+      { letter: "E", label: "Écologique", color: "#22c55e", text: "Climat, environnement, recyclage" },
+      { letter: "L", label: "Légal", color: "#a855f7", text: "Réglementations, droit du travail" }
+    ];
+
+    return (
+      <div style={{
+        marginTop: 20, padding: "20px 10px", border: "1px dashed #cbd5e1", borderRadius: 12,
+        background: "#fcfdfa", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12
+      }}>
+        {pillars.map((p, idx) => (
+          <div key={idx} style={{
+            background: "white", border: `1px solid ${p.color}20`, borderRadius: 8, padding: 10,
+            textAlign: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.02)", display: "flex", flexDirection: "column", alignItems: "center"
+          }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: "50%", background: p.color, color: "white",
+              display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, marginBottom: 6
+            }}>
+              {p.letter}
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: p.color, fontFamily: "cursive, sans-serif" }}>{p.label}</div>
+            <div style={{ fontSize: 9, color: "#64748b", marginTop: 4, fontFamily: "sans-serif", lineHeight: 1.2 }}>{p.text}</div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Diagram 4: Porter's 5 Forces
+  const renderPorterDiagram = () => (
+    <div style={{
+      marginTop: 20, height: 320, border: "1px dashed #cbd5e1", borderRadius: 12,
+      background: "#fcfdfa", position: "relative", padding: 10
+    }}>
+      <div style={{
+        position: "absolute", top: 15, left: "50%", transform: "translateX(-50%)",
+        background: "white", border: "1px solid #ea580c", borderRadius: 8, padding: "6px 12px",
+        textAlign: "center", fontSize: 11, width: 140, boxShadow: "0 2px 4px rgba(0,0,0,0.03)"
+      }}>
+        <div style={{ fontWeight: 700, color: "#ea580c" }}>Nouveaux entrants</div>
+        <div style={{ fontSize: 9, color: "#64748b" }}>Menace de pénétration ⬇️</div>
+      </div>
+      <div style={{
+        position: "absolute", top: "50%", left: 15, transform: "translateY(-50%)",
+        background: "white", border: "1px solid #3b82f6", borderRadius: 8, padding: "6px 12px",
+        textAlign: "center", fontSize: 11, width: 110, boxShadow: "0 2px 4px rgba(0,0,0,0.03)"
+      }}>
+        <div style={{ fontWeight: 700, color: "#3b82f6" }}>Fournisseurs</div>
+        <div style={{ fontSize: 9, color: "#64748b" }}>Pouvoir de négoc. ➔</div>
+      </div>
+      <div style={{
+        position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
+        background: "#eff6ff", border: "2px solid #2563eb", borderRadius: 8, padding: "8px 14px",
+        textAlign: "center", fontSize: 12, width: 150, zIndex: 2, boxShadow: "0 4px 6px rgba(37,99,235,0.1)"
+      }}>
+        <div style={{ fontWeight: 700, color: "#1e3a8a" }}>Rivalité du secteur</div>
+        <div style={{ fontSize: 9, color: "#1e40af" }}>Intensité concurrentielle</div>
+      </div>
+      <div style={{
+        position: "absolute", top: "50%", right: 15, transform: "translateY(-50%)",
+        background: "white", border: "1px solid #3b82f6", borderRadius: 8, padding: "6px 12px",
+        textAlign: "center", fontSize: 11, width: 110, boxShadow: "0 2px 4px rgba(0,0,0,0.03)"
+      }}>
+        <div style={{ fontWeight: 700, color: "#3b82f6" }}>Clients</div>
+        <div style={{ fontSize: 9, color: "#64748b" }}>⬅️ Pouvoir de négoc.</div>
+      </div>
+      <div style={{
+        position: "absolute", bottom: 15, left: "50%", transform: "translateX(-50%)",
+        background: "white", border: "1px solid #a855f7", borderRadius: 8, padding: "6px 12px",
+        textAlign: "center", fontSize: 11, width: 140, boxShadow: "0 2px 4px rgba(0,0,0,0.03)"
+      }}>
+        <div style={{ fontWeight: 700, color: "#a855f7" }}>Substituts</div>
+        <div style={{ fontSize: 9, color: "#64748b" }}>⬆️ Menace des produits</div>
+      </div>
+    </div>
+  );
+
+  // Diagram 5: Finance Dashboard
+  const renderFinanceDashboard = () => (
+    <div style={{
+      marginTop: 20, border: "1px dashed #cbd5e1", borderRadius: 12,
+      background: "#fcfdfa", padding: 16, display: "flex", flexDirection: "column", gap: 12
+    }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+        <div style={{ background: "white", padding: 8, borderRadius: 6, border: "1px solid #e2e8f0", textAlign: "center" }}>
+          <div style={{ fontSize: 9, color: "#64748b" }}>Chiffre d'Affaires</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#16a34a" }}>450 k€ (+8%)</div>
+        </div>
+        <div style={{ background: "white", padding: 8, borderRadius: 6, border: "1px solid #e2e8f0", textAlign: "center" }}>
+          <div style={{ fontSize: 9, color: "#64748b" }}>Marge brute</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#2563eb" }}>42.5%</div>
+        </div>
+        <div style={{ background: "white", padding: 8, borderRadius: 6, border: "1px solid #e2e8f0", textAlign: "center" }}>
+          <div style={{ fontSize: 9, color: "#64748b" }}>Marge EBITDA</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#ca8a04" }}>18.2%</div>
+        </div>
+      </div>
+      <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: 8, padding: 10 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: "#475569", marginBottom: 6, fontFamily: "cursive, sans-serif" }}>Évolution du CA (k€)</div>
+        <svg width="100%" height="90" viewBox="0 0 200 90">
+          <line x1="20" y1="75" x2="190" y2="75" stroke="#cbd5e1" strokeWidth="1" />
+          <line x1="20" y1="10" x2="20" y2="75" stroke="#cbd5e1" strokeWidth="1" />
+          <line x1="20" y1="45" x2="190" y2="45" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
+          <line x1="20" y1="20" x2="190" y2="20" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 3" />
+          <path d="M20 68 L 60 60 L 100 44 L 140 35 L 180 18" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" />
+          <circle cx="20" cy="68" r="2.5" fill="#2563eb" />
+          <circle cx="60" cy="60" r="2.5" fill="#2563eb" />
+          <circle cx="100" cy="44" r="2.5" fill="#2563eb" />
+          <circle cx="140" cy="35" r="2.5" fill="#2563eb" />
+          <circle cx="180" cy="18" r="2.5" fill="#2563eb" />
+          <text x="20" y="85" fontSize="7" fill="#94a3b8" textAnchor="middle">2020</text>
+          <text x="60" y="85" fontSize="7" fill="#94a3b8" textAnchor="middle">2021</text>
+          <text x="100" y="85" fontSize="7" fill="#94a3b8" textAnchor="middle">2022</text>
+          <text x="140" y="85" fontSize="7" fill="#94a3b8" textAnchor="middle">2023</text>
+          <text x="180" y="85" fontSize="7" fill="#94a3b8" textAnchor="middle">2024</text>
+        </svg>
+      </div>
+    </div>
+  );
+
+  // Diagram Switcher based on course info
+  const renderLeftDiagram = () => {
+    const t = course.title.toLowerCase();
+    const id = course.id.toLowerCase();
+    if (t.includes("photosynthèse") || id.includes("photosynthesis")) {
+      return renderPlantDiagram();
+    } else if (t.includes("swot") || id.includes("swot")) {
+      return renderSwotBullets();
+    } else if (t.includes("pestel") || id.includes("pestel")) {
+      return renderPestelDiagram();
+    } else if (t.includes("porter") || id.includes("porter")) {
+      return renderPorterDiagram();
+    } else if (t.includes("finance") || id.includes("finance")) {
+      return renderFinanceDashboard();
+    }
+    return (
+      <div style={{ 
+        marginTop: 20, height: 180, border: "1px dashed #cbd5e1", borderRadius: 12, 
+        display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", 
+        fontSize: 13, background: "#fafafa", fontFamily: "cursive, sans-serif" 
+      }}>
+        Double-cliquez pour ajouter des notes ou parlez au micro.
+      </div>
+    );
+  };
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#f8fafc", overflow: "hidden", position: "relative" }}>
       {/* Top Banner */}
       <div style={{ background: "#0f172a", color: "#94a3b8", padding: "8px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13 }}>
-        <div>Cours : {course.title}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span>Cours : <strong>{course.title}</strong></span>
+          <span style={{ color: "#334155" }}>|</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <ProfileAvatar profile={activeProfile} size={18} />
+            <span style={{ fontSize: 11, fontWeight: 600, color: activeProfile?.color || "#94a3b8" }}>
+              {activeProfile ? `${activeProfile.lastName.toUpperCase()} ${activeProfile.firstName}` : "Invité"}
+            </span>
+          </div>
+        </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <span>{localTime}</span>
           <span>📶 🔋</span>
@@ -486,7 +855,7 @@ function Whiteboard({
           <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "40px", pointerEvents: activeTab === "selectionner" ? "none" : "auto" }}>
             
             {/* Left Column: Visual Diagram Concept */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
               {/* Description */}
               <div style={{ position: "relative" }}>
                 {editingDesc ? (
@@ -501,7 +870,7 @@ function Whiteboard({
                     }}
                     autoFocus
                     style={{
-                      width: "100%", height: 80, fontFamily: "cursive, sans-serif", fontSize: 16,
+                      width: "100%", height: 100, fontFamily: "cursive, sans-serif", fontSize: 16,
                       lineHeight: 1.6, padding: 8, border: "1px solid #cbd5e1", borderRadius: 8, outline: "none",
                       background: "#fafafa", color: selectedColor
                     }}
@@ -522,44 +891,13 @@ function Whiteboard({
                       cursor: "pointer" 
                     }}
                   >
-                    {displayDescription}
+                    {displayDescription()}
                   </p>
                 )}
               </div>
 
-              {/* Hand-drawn style Plant Box Concept */}
-              <div style={{ position: "relative", marginTop: 20, padding: 20, height: 320, border: "1px dashed #cbd5e1", borderRadius: 12 }}>
-                {/* Sun */}
-                <div style={{ position: "absolute", top: 10, left: 10, textAlign: "center" }}>
-                  <span style={{ fontSize: 44 }}>☀️</span>
-                  <div style={{ color: "#eab308", fontSize: 12, fontFamily: "cursive" }}>Lumière</div>
-                </div>
-
-                {/* CO2 */}
-                <div style={{ position: "absolute", bottom: 120, left: 10, fontSize: 13, fontFamily: "cursive" }}>
-                  CO₂ <br /> <span style={{ fontSize: 11, color: "#64748b" }}>(Dioxyde de carbone)</span> ➔
-                </div>
-
-                {/* Water */}
-                <div style={{ position: "absolute", bottom: 20, left: 20, fontSize: 13, fontFamily: "cursive", color: "#2563eb" }}>
-                  Eau (H₂O) ➔
-                </div>
-
-                {/* Central Plant Representation */}
-                <div style={{ textAlign: "center", marginTop: 60 }}>
-                  <span style={{ fontSize: 90 }}>🌱</span>
-                </div>
-
-                {/* Oxygen output */}
-                <div style={{ position: "absolute", top: 40, right: 20, fontSize: 13, fontFamily: "cursive", color: "#2563eb" }}>
-                  ➔ O₂ <br /> <span style={{ fontSize: 11, color: "#64748b" }}>(Oxygène)</span>
-                </div>
-
-                {/* Sugar output */}
-                <div style={{ position: "absolute", bottom: 80, right: 20, fontSize: 13, fontFamily: "cursive", color: "#6d28d9" }}>
-                  🪟 Sucre <br /> <span style={{ fontSize: 11, color: "#64748b" }}>(Glucose)</span>
-                </div>
-              </div>
+              {/* Course-specific Diagram Render */}
+              {renderLeftDiagram()}
             </div>
 
             {/* Right Column: Key Points */}
@@ -631,7 +969,6 @@ function Whiteboard({
             const isNote = card.type === "notes_cours" || card.type === "speech_note";
             const isQuestion = card.type === "question";
             
-            // Choose card style based on type
             const cardBg = isQuestion ? "#f5f3ff" : (card.type === "speech_note" ? (card.color || "#fef08a") : "#f8fafc");
             const cardBorder = isQuestion ? "1px solid #ddd6fe" : "1px solid #e2e8f0";
             const titleColor = card.color || (isQuestion ? "#7c3aed" : (card.type === "speech_note" ? "#854d0e" : "#2563eb"));
@@ -653,7 +990,7 @@ function Whiteboard({
                   borderRadius: 12,
                   padding: "16px",
                   boxShadow: isDragging 
-                    ? "0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" 
+                     ? "0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" 
                     : "0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
                   userSelect: "none",
                   zIndex: isDragging ? 1000 : 10,
@@ -661,10 +998,8 @@ function Whiteboard({
                   transition: isDragging ? "none" : "box-shadow 0.15s, transform 0.15s"
                 }}
               >
-                {/* Pin element if it's pinned/has a pin */}
                 {(isQuestion || isNote || card.isPinned) && renderPin(card.color)}
                 
-                {/* Card Header with delete button */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, borderBottom: borderDash, paddingBottom: 6 }}>
                   <span style={{ 
                     fontWeight: "normal", 
@@ -683,7 +1018,6 @@ function Whiteboard({
                   </button>
                 </div>
 
-                {/* Card Content */}
                 <div>
                   {editingCardId === card.id ? (
                     <textarea
@@ -773,7 +1107,6 @@ function Whiteboard({
                   }}
                   title={`Couleur: ${pen.id}`}
                 >
-                  {/* Pen tip */}
                   <div style={{
                     position: "absolute", top: -8, left: 2, width: 8, height: 8,
                     background: pen.color, clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)"
@@ -882,7 +1215,6 @@ function Whiteboard({
         )}
       </div>
 
-      {/* Embedded CSS styles for animations */}
       <style>{`
         @keyframes pulse-anim {
           0% { transform: scale(0.9); opacity: 0.8; }
@@ -991,146 +1323,376 @@ function ShareModal({ course, onClose }) {
   );
 }
 
+// ── Course Thumbnail Component ───────────────────────────────────────────────
+function CourseThumbnail({ course }) {
+  const t = course.title.toLowerCase();
+  const id = course.id.toLowerCase();
+
+  // SWOT Thumbnail (grid panel style matching image)
+  if (t.includes("swot") || id.includes("swot")) {
+    return (
+      <div style={{
+        width: 120, height: 80, background: "white", border: "1px solid #cbd5e1", borderRadius: 6,
+        padding: "4px 8px", display: "flex", flexDirection: "column", gap: 2, fontSize: 6, overflow: "hidden", userSelect: "none"
+      }}>
+        <div style={{ textAlign: "center", fontSize: 6, fontWeight: 700, color: "#1e293b", letterSpacing: "0.2px", marginBottom: 2 }}>ANALYSE SWOT</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, flex: 1 }}>
+          <div style={{ background: "#f0fdf4", border: "1px solid #dcfce7", borderRadius: 2, padding: "2px 3px", color: "#16a34a", fontWeight: "bold" }}>
+            Forces
+            <div style={{ height: 1, background: "#cbd5e1", width: "80%", marginTop: 2 }} />
+            <div style={{ height: 1, background: "#cbd5e1", width: "60%", marginTop: 1 }} />
+          </div>
+          <div style={{ background: "#fff7ed", border: "1px solid #ffedd5", borderRadius: 2, padding: "2px 3px", color: "#ea580c", fontWeight: "bold" }}>
+            Faiblesses
+            <div style={{ height: 1, background: "#cbd5e1", width: "70%", marginTop: 2 }} />
+            <div style={{ height: 1, background: "#cbd5e1", width: "50%", marginTop: 1 }} />
+          </div>
+          <div style={{ background: "#eff6ff", border: "1px solid #dbeafe", borderRadius: 2, padding: "2px 3px", color: "#2563eb", fontWeight: "bold" }}>
+            Opportunités
+          </div>
+          <div style={{ background: "#fbf7ff", border: "1px solid #f3e8ff", borderRadius: 2, padding: "2px 3px", color: "#9333ea", fontWeight: "bold" }}>
+            Menaces
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // PESTEL Thumbnail
+  if (t.includes("pestel") || id.includes("pestel")) {
+    return (
+      <div style={{
+        width: 120, height: 80, background: "white", border: "1px solid #cbd5e1", borderRadius: 6,
+        padding: "4px 8px", display: "flex", flexDirection: "column", gap: 3, fontSize: 6, overflow: "hidden", userSelect: "none"
+      }}>
+        <div style={{ textAlign: "center", fontSize: 6, fontWeight: 700, color: "#1e293b", marginBottom: 2 }}>ANALYSE PESTEL</div>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 1, marginTop: 2 }}>
+          {["P", "E", "S", "T", "E", "L"].map((l, i) => {
+            const colors = ["#3b82f6", "#3b82f6", "#ea580c", "#ea580c", "#22c55e", "#a855f7"];
+            return (
+              <div key={i} style={{
+                width: 12, height: 12, borderRadius: "50%", background: colors[i], color: "white",
+                display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: 6
+              }}>{l}</div>
+            );
+          })}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, marginTop: 4, padding: "0 2px" }}>
+          <div style={{ height: 2, background: "#cbd5e1", width: "90%" }} />
+          <div style={{ height: 2, background: "#e2e8f0", width: "70%" }} />
+        </div>
+      </div>
+    );
+  }
+
+  // Porter Thumbnail
+  if (t.includes("porter") || id.includes("porter")) {
+    return (
+      <div style={{
+        width: 120, height: 80, background: "white", border: "1px solid #cbd5e1", borderRadius: 6,
+        padding: "4px 8px", display: "flex", flexDirection: "column", gap: 2, fontSize: 5, overflow: "hidden", position: "relative", userSelect: "none"
+      }}>
+        <div style={{ textAlign: "center", fontSize: 6, fontWeight: 700, color: "#1e293b", marginBottom: 2 }}>LES 5 FORCES DE PORTER</div>
+        <div style={{ position: "absolute", top: 18, left: "50%", transform: "translateX(-50%)", width: 28, height: 8, background: "#fff7ed", border: "1px solid #f97316", borderRadius: 1 }} />
+        <div style={{ position: "absolute", top: 30, left: 6, width: 24, height: 8, background: "#eff6ff", border: "1px solid #3b82f6", borderRadius: 1 }} />
+        <div style={{ position: "absolute", top: 28, left: "50%", transform: "translateX(-50%)", width: 34, height: 12, background: "#f0fdf4", border: "1px solid #16a34a", borderRadius: 1 }} />
+        <div style={{ position: "absolute", top: 30, right: 6, width: 24, height: 8, background: "#eff6ff", border: "1px solid #3b82f6", borderRadius: 1 }} />
+        <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", width: 28, height: 8, background: "#fbf7ff", border: "1px solid #a855f7", borderRadius: 1 }} />
+      </div>
+    );
+  }
+
+  // Finance Thumbnail
+  if (t.includes("finance") || id.includes("finance")) {
+    return (
+      <div style={{
+        width: 120, height: 80, background: "white", border: "1px solid #cbd5e1", borderRadius: 6,
+        padding: "4px 8px", display: "flex", flexDirection: "column", gap: 2, fontSize: 6, overflow: "hidden", userSelect: "none"
+      }}>
+        <div style={{ textAlign: "center", fontSize: 6, fontWeight: 700, color: "#1e293b", marginBottom: 2 }}>ANALYSE FINANCIÈRE</div>
+        <div style={{ display: "flex", gap: 4, marginTop: 2, height: 16 }}>
+          <div style={{ flex: 1, background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 2, display: "flex", alignItems: "flex-end", padding: 1, gap: 1 }}>
+            <div style={{ height: "40%", width: 2, background: "#94a3b8" }} />
+            <div style={{ height: "60%", width: 2, background: "#94a3b8" }} />
+            <div style={{ height: "80%", width: 2, background: "#2563eb" }} />
+          </div>
+          <div style={{ flex: 1.5, border: "1px solid #e2e8f0", borderRadius: 2, padding: "1px 2px", display: "flex", flexDirection: "column", gap: 1 }}>
+            <div style={{ height: 1, background: "#cbd5e1", width: "95%" }} />
+            <div style={{ height: 1, background: "#cbd5e1", width: "70%" }} />
+            <div style={{ height: 1, background: "#e2e8f0", width: "50%" }} />
+          </div>
+        </div>
+        <svg width="100%" height="20" style={{ marginTop: 2 }}>
+          <path d="M5 16 L 25 15 L 50 8 L 75 10 L 105 3" fill="none" stroke="#2563eb" strokeWidth="1" />
+          <circle cx="105" cy="3" r="1.2" fill="#2563eb" />
+        </svg>
+      </div>
+    );
+  }
+
+  // Photosynthèse / Default Thumbnail
+  return (
+    <div style={{
+      width: 120, height: 80, background: "white", border: "1px solid #cbd5e1", borderRadius: 6,
+      padding: "4px 8px", display: "flex", flexDirection: "column", justifyContent: "space-between", overflow: "hidden", position: "relative", userSelect: "none"
+    }}>
+      <div style={{ textAlign: "center", fontSize: 6, fontWeight: 700, color: "#16a34a", fontFamily: "cursive, sans-serif" }}>La photosynthèse</div>
+      <div style={{ position: "absolute", top: 15, left: 10, fontSize: 8 }}>☀️</div>
+      <div style={{ textAlign: "center", fontSize: 24, marginTop: 2 }}>🌱</div>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 5, color: "#64748b" }}>
+        <span>CO₂ ➔</span>
+        <span>➔ O₂</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Full-screen History View Component ─────────────────────────────────────────
-function HistoryView({ courses, activeId, onLoad, onDelete }) {
+function HistoryView({ courses, activeId, onLoad, onDelete, onRename }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("Tous");
+  const [activeMenuId, setActiveMenuId] = useState(null);
+
+  useEffect(() => {
+    const handleCloseMenu = () => setActiveMenuId(null);
+    window.addEventListener("click", handleCloseMenu);
+    return () => window.removeEventListener("click", handleCloseMenu);
+  }, []);
 
   const filteredCourses = courses.filter(c => {
     const titleMatch = c.title.toLowerCase().includes(searchQuery.toLowerCase());
     const descMatch = c.description.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    if (activeFilter === "Tous") return titleMatch || descMatch;
+    if (activeFilter === "Aujourd'hui") return (c.dateLabel === "Aujourd'hui" && (titleMatch || descMatch));
+    if (activeFilter === "Cette semaine") return ((c.dateLabel === "Aujourd'hui" || c.dateLabel === "Hier") && (titleMatch || descMatch));
+    if (activeFilter === "Ce mois") return titleMatch || descMatch;
     return titleMatch || descMatch;
   });
 
+  const groups = {};
+  filteredCourses.forEach(c => {
+    const label = c.dateLabel || "Aujourd'hui";
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(c);
+  });
+
+  const orderedGroups = ["Aujourd'hui", "Hier", "Avant-hier", "Plus ancien"].filter(g => groups[g] && groups[g].length > 0);
+
   return (
-    <div style={{ flex: 1, background: "#f8fafc", padding: "40px 60px", overflowY: "auto" }}>
-      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+    <div style={{ flex: 1, background: "#f8fafc", padding: "40px 60px", overflowY: "auto", display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ maxWidth: 900, width: "100%", margin: "0 auto", flex: 1 }}>
         
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <div>
             <h2 style={{ margin: 0, fontSize: 28, fontWeight: 700, color: "#0f172a" }}>Historique</h2>
-            <p style={{ margin: "4px 0 0 0", fontSize: 14, color: "#64748b" }}>Retrouvez toutes vos pages</p>
+            <p style={{ margin: "4px 0 0 0", fontSize: 13, color: "#64748b" }}>Retrouvez toutes vos pages</p>
           </div>
           
-          <input 
-            placeholder="Rechercher..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ 
-              padding: "10px 16px", borderRadius: 8, border: "1px solid #e2e8f0", 
-              outline: "none", fontSize: 13, width: 240, background: "white",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
-            }}
-          />
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+              <span style={{ position: "absolute", left: 12, color: "#94a3b8", fontSize: 14 }}>🔍</span>
+              <input 
+                placeholder="Rechercher..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ 
+                  padding: "10px 16px 10px 32px", borderRadius: 8, border: "1px solid #cbd5e1", 
+                  outline: "none", fontSize: 13, width: 220, background: "white",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)", color: "#1e293b"
+                }}
+              />
+            </div>
+            <button style={{
+              background: "white", border: "1px solid #cbd5e1", borderRadius: 8, width: 38, height: 38,
+              display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#64748b"
+            }}>
+              🎛️
+            </button>
+          </div>
         </div>
 
         {/* Filter Tabs */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-          {["Tous", "Aujourd'hui", "Cette semaine", "Ce mois", "Personnalisé 📅"].map(tab => (
-            <button
-              key={tab}
-              onClick={() => tab !== "Personnalisé 📅" && setActiveFilter(tab)}
-              style={{
-                padding: "8px 16px", borderRadius: 20, 
-                border: activeFilter === tab ? "none" : "1px solid #cbd5e1",
-                background: activeFilter === tab ? "#2563eb" : "white",
-                color: activeFilter === tab ? "white" : "#64748b",
-                fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.15s"
-              }}
-            >
-              {tab}
-            </button>
-          ))}
+        <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+          {["Tous", "Aujourd'hui", "Cette semaine", "Ce mois", "Personnalisé 📅"].map(tab => {
+            const isActive = activeFilter === tab;
+            return (
+              <button
+                key={tab}
+                onClick={() => tab !== "Personnalisé 📅" && setActiveFilter(tab)}
+                style={{
+                  padding: "6px 16px", borderRadius: 20, 
+                  border: isActive ? "none" : "1px solid #cbd5e1",
+                  background: isActive ? "#2563eb" : "white",
+                  color: isActive ? "white" : "#64748b",
+                  fontSize: 13, fontWeight: 500, cursor: "pointer", transition: "all 0.15s"
+                }}
+              >
+                {tab}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Course cards list */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {filteredCourses.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "40px 0", color: "#64748b", background: "white", borderRadius: 12, border: "1px solid #e2e8f0" }}>
+        {/* Grouped courses list */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 40 }}>
+          {orderedGroups.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "40px 0", color: "#64748b", background: "white", borderRadius: 12, border: "1px solid #cbd5e1", fontSize: 13 }}>
               Aucune page enregistrée dans l'historique de ce profil.
             </div>
           ) : (
-            filteredCourses.map(c => {
-              const isSwot = c.title.toLowerCase().includes("swot");
-              const isPhotosynthese = c.title.toLowerCase().includes("photo");
-              
-              // Custom category badges based on content
-              const categoryBadge = isSwot 
-                ? { text: "Management stratégique", bg: "#f5f3ff", color: "#7c3aed" }
-                : isPhotosynthese 
-                  ? { text: "Biologie", bg: "#f0fdf4", color: "#16a34a" }
-                  : { text: "Stratégie", bg: "#eff6ff", color: "#2563eb" };
-
-              return (
-                <div 
-                  key={c.id}
-                  onClick={() => onLoad(c.id)}
-                  style={{
-                    background: "white", border: "1px solid #e2e8f0", borderRadius: 12, padding: 16,
-                    display: "flex", gap: 20, alignItems: "center", cursor: "pointer", transition: "all 0.2s",
-                    boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.transform = "none"; }}
-                >
-                  {/* Miniature Thumbnail */}
-                  <div style={{ 
-                    width: 120, height: 80, borderRadius: 8, background: "#f8fafc", overflow: "hidden",
-                    border: "1px solid #e2e8f0", display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0
-                  }}>
-                    {isSwot ? (
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 3, width: "100%", height: "100%", padding: 6 }}>
-                        <div style={{ background: "#22c55e", borderRadius: 2 }} />
-                        <div style={{ background: "#f97316", borderRadius: 2 }} />
-                        <div style={{ background: "#3b82f6", borderRadius: 2 }} />
-                        <div style={{ background: "#a855f7", borderRadius: 2 }} />
-                      </div>
-                    ) : isPhotosynthese ? (
-                      <span style={{ fontSize: 32 }}>🌱</span>
-                    ) : (
-                      <span style={{ fontSize: 24 }}>📝</span>
-                    )}
-                  </div>
-
-                  {/* Course info details */}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#0f172a" }}>{c.title}</h3>
-                      <span style={{ fontSize: 11, background: categoryBadge.bg, color: categoryBadge.color, padding: "2px 8px", borderRadius: 12, fontWeight: 500 }}>
-                        {categoryBadge.text}
-                      </span>
-                    </div>
-                    <p style={{ margin: "6px 0 0 0", fontSize: 12, color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 400 }}>
-                      {c.description}
-                    </p>
-                    <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 8 }}>
-                      1 page
-                    </div>
-                  </div>
-
-                  {/* Options / Action button */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
-                    <span style={{ fontSize: 12, color: "#64748b" }}>10:45</span>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); if (confirm("Supprimer ce cours définitivement ?")) onDelete(c.id); }}
-                      style={{
-                        border: "none", background: "none", cursor: "pointer", color: "#ef4444", fontSize: 16,
-                        padding: 8, borderRadius: 6
-                      }}
-                      title="Supprimer de l'historique"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-
+            orderedGroups.map(groupLabel => (
+              <div key={groupLabel} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "#475569", paddingLeft: 4 }}>
+                  {groupLabel}
                 </div>
-              );
-            })
+                
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {groups[groupLabel].map(c => {
+                    const tLower = c.title.toLowerCase();
+                    const isSwot = tLower.includes("swot");
+                    const isPhotosynthese = tLower.includes("photo");
+                    const isPestel = tLower.includes("pestel");
+                    const isPorter = tLower.includes("porter");
+                    const isFinance = tLower.includes("finance");
+                    
+                    let badge = { text: "Général", bg: "#f1f5f9", color: "#475569" };
+                    if (isSwot) badge = { text: "Management stratégique", bg: "#f0fdf4", color: "#16a34a" };
+                    else if (isPhotosynthese) badge = { text: "Biologie", bg: "#f0fdf4", color: "#16a34a" };
+                    else if (isPestel) badge = { text: "Stratégie", bg: "#eff6ff", color: "#2563eb" };
+                    else if (isPorter) badge = { text: "Marketing stratégique", bg: "#fbf7ff", color: "#9333ea" };
+                    else if (isFinance) badge = { text: "Finance", bg: "#fff7ed", color: "#ea580c" };
+
+                    const isSelected = activeId === c.id;
+
+                    return (
+                      <div 
+                        key={c.id}
+                        onClick={() => onLoad(c.id)}
+                        style={{
+                          background: "white", border: isSelected ? "1.5px solid #2563eb" : "1px solid #cbd5e1", borderRadius: 12, padding: 16,
+                          display: "flex", gap: 20, alignItems: "center", cursor: "pointer", transition: "all 0.15s",
+                          boxShadow: "0 1px 3px rgba(15,23,42,0.02)"
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = isSelected ? "#2563eb" : "#94a3b8"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = isSelected ? "#2563eb" : "#cbd5e1"; e.currentTarget.style.transform = "none"; }}
+                      >
+                        <CourseThumbnail course={c} />
+
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#0f172a" }}>{c.title}</h3>
+                            <span style={{ fontSize: 11, background: badge.bg, color: badge.color, padding: "2px 8px", borderRadius: 12, fontWeight: 500 }}>
+                              {badge.text}
+                            </span>
+                          </div>
+                          <p style={{ margin: "6px 0 0 0", fontSize: 12, color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 450 }}>
+                            {c.description === "Commencer à écrire ou parlez au micro..." ? "Aucun contenu enregistré..." : c.description}
+                          </p>
+                          <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 8 }}>
+                            1 page
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0, position: "relative" }}>
+                          <span style={{ fontSize: 12, color: "#64748b", fontWeight: 500 }}>{c.timeLabel || "10:45"}</span>
+                          
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveMenuId(activeMenuId === c.id ? null : c.id);
+                            }}
+                            style={{
+                              border: "none", background: "none", cursor: "pointer", color: "#64748b", fontSize: 18,
+                              padding: 6, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                              transition: "background 0.2s"
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = "#f1f5f9"}
+                            onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+                            title="Menu actions"
+                          >
+                            •••
+                          </button>
+
+                          {activeMenuId === c.id && (
+                            <div style={{
+                              position: "absolute", right: 0, top: 32, background: "white", borderRadius: 8,
+                              border: "1px solid #cbd5e1", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+                              zIndex: 100, width: 140, display: "flex", flexDirection: "column", padding: 4
+                            }}>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); onLoad(c.id); }}
+                                style={{
+                                  background: "none", border: "none", padding: "8px 12px", fontSize: 12, cursor: "pointer",
+                                  textAlign: "left", color: "#334155", borderRadius: 4, width: "100%", fontWeight: 500
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = "#f1f5f9"}
+                                onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+                              >
+                                📖 Ouvrir le cours
+                              </button>
+                              <button 
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  const name = prompt("Renommer le cours :", c.title);
+                                  if (name && name.trim()) onRename(c.id, name.trim());
+                                }}
+                                style={{
+                                  background: "none", border: "none", padding: "8px 12px", fontSize: 12, cursor: "pointer",
+                                  textAlign: "left", color: "#334155", borderRadius: 4, width: "100%", fontWeight: 500
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = "#f1f5f9"}
+                                onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+                              >
+                                ✏️ Renommer
+                              </button>
+                              <div style={{ height: 1, background: "#e2e8f0", margin: "4px 0" }} />
+                              <button 
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  if (confirm(`Supprimer le cours "${c.title}" ?`)) onDelete(c.id); 
+                                }}
+                                style={{
+                                  background: "none", border: "none", padding: "8px 12px", fontSize: 12, cursor: "pointer",
+                                  textAlign: "left", color: "#ef4444", borderRadius: 4, width: "100%", fontWeight: 600
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.background = "#fef2f2"}
+                                onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+                              >
+                                🗑️ Supprimer
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
           )}
         </div>
+      </div>
 
+      <div style={{ 
+        borderTop: "1px solid #e2e8f0", padding: "12px 24px", display: "flex", 
+        justifyContent: "space-between", alignItems: "center", background: "white" 
+      }}>
+        <div style={{ fontSize: 13, color: "#64748b" }}>
+          {filteredCourses.length} éléments au total
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <button style={{ border: "1px solid #cbd5e1", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", fontSize: 12, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>🔍</button>
+          <span style={{ fontSize: 13, color: "#334155", fontWeight: 600 }}>100%</span>
+          <button style={{ border: "1px solid #cbd5e1", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", fontSize: 12, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+          <button style={{ border: "1px solid #cbd5e1", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", fontSize: 12, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
+          <div style={{ width: 1, height: 16, background: "#cbd5e1" }}></div>
+          <button style={{ border: "1px solid #cbd5e1", borderRadius: 8, padding: "4px 10px", cursor: "pointer", fontSize: 13, background: "#fff", display: "flex", alignItems: "center", gap: 4 }}>
+            🖐️
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1139,12 +1701,12 @@ function HistoryView({ courses, activeId, onLoad, onDelete }) {
 // ── Full-screen Home View Component ────────────────────────────────────────────
 function HomeView({ profiles, activeProfileId, onSelectProfile, onOpenNewUserModal }) {
   return (
-    <div style={{ flex: 1, background: "#f8fafc", padding: "40px 60px", overflowY: "auto" }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+    <div style={{ flex: 1, background: "#f8fafc", padding: "40px 60px", overflowY: "auto", display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ maxWidth: 900, width: "100%", margin: "0 auto", flex: 1 }}>
         
         {/* Welcome Banner */}
-        <div style={{ textAlign: "center", marginBottom: 40, marginTop: 20 }}>
-          <h1 style={{ fontSize: 32, fontWeight: 700, color: "#0f172a", margin: 0 }}>
+        <div style={{ textAlign: "center", marginBottom: 36, marginTop: 10 }}>
+          <h1 style={{ fontSize: 32, fontWeight: 700, color: "#0f172a", margin: 0, fontFamily: "sans-serif" }}>
             Bienvenue sur <span style={{ color: "#3b82f6" }}>IdeaGrid</span>
           </h1>
           <p style={{ fontSize: 15, color: "#64748b", marginTop: 10, maxWidth: 600, margin: "10px auto 0", lineHeight: 1.5 }}>
@@ -1152,131 +1714,137 @@ function HomeView({ profiles, activeProfileId, onSelectProfile, onOpenNewUserMod
           </p>
         </div>
 
-        {/* Profiles Section */}
-        <div style={{ background: "white", borderRadius: 16, padding: 30, boxShadow: "0 1px 3px rgba(0,0,0,0.05)", marginBottom: 24, border: "1px solid #e2e8f0" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-            <span style={{ fontSize: 20 }}>👥</span>
-            <h2 style={{ fontSize: 17, fontWeight: 600, color: "#0f172a", margin: 0 }}>Choisir un profil</h2>
+        {/* Profiles Grid Container */}
+        <div style={{ background: "white", borderRadius: 16, padding: 30, boxShadow: "0 1px 3px rgba(15,23,42,0.05)", marginBottom: 24, border: "1px solid #cbd5e1" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+            <span style={{ fontSize: 18 }}>👤</span>
+            <h2 style={{ fontSize: 16, fontWeight: 600, color: "#0f172a", margin: 0 }}>Choisir un profil</h2>
           </div>
-          <p style={{ fontSize: 13, color: "#64748b", margin: "-12px 0 24px 30px" }}>
+          <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 24px 28px" }}>
             Sélectionnez un profil pour continuer ou utilisez le mode invité.
           </p>
 
-          <div style={{ display: "flex", gap: 16, overflowX: "auto", paddingBottom: 10 }}>
-            {profiles.map(p => {
-              const isActive = activeProfileId === p.id;
-              const initials = (p.firstName[0] || "") + (p.lastName[0] || "");
-              return (
-                <div 
-                  key={p.id}
-                  onClick={() => onSelectProfile(p.id)}
-                  style={{
-                    minWidth: 160, width: 160, background: "white", border: isActive ? `2px solid ${p.color}` : "1px solid #e2e8f0",
-                    borderRadius: 12, padding: "24px 16px", textAlign: "center", cursor: "pointer",
-                    boxShadow: isActive ? "0 4px 12px rgba(0,0,0,0.05)" : "none",
-                    transition: "all 0.2s", position: "relative"
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 8px 16px rgba(0,0,0,0.05)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = isActive ? "0 4px 12px rgba(0,0,0,0.05)" : "none"; }}
-                >
-                  {/* Status dot */}
-                  <span style={{ position: "absolute", top: 15, right: 15, width: 8, height: 8, borderRadius: "50%", background: p.color }} />
-                  
-                  {/* Avatar */}
-                  <div style={{ 
-                    width: 60, height: 60, borderRadius: "50%", background: p.color + "15", color: p.color,
-                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700,
-                    margin: "0 auto 12px"
-                  }}>
-                    {initials.toUpperCase()}
-                  </div>
+          <div style={{ display: "flex", gap: 16, alignItems: "center", overflowX: "auto", paddingBottom: 10 }}>
+            {profiles.length === 0 ? (
+              <div style={{ 
+                padding: "24px", color: "#64748b", background: "#f8fafc", 
+                borderRadius: 12, border: "1.5px dashed #cbd5e1", textAlign: "center",
+                fontSize: 13, flex: 1, minHeight: 142, display: "flex", flexDirection: "column",
+                alignItems: "center", justifyContent: "center", gap: 10
+              }}>
+                <span style={{ fontSize: 28 }}>👥</span>
+                <span style={{ fontWeight: 600, color: "#475569" }}>Aucun profil créé</span>
+                <span style={{ fontSize: 12, color: "#94a3b8" }}>Créez un nouveau profil pour commencer à sauvegarder vos cours.</span>
+              </div>
+            ) : (
+              profiles.map(p => {
+                const isActive = activeProfileId === p.id;
+                return (
+                  <div 
+                    key={p.id}
+                    onClick={() => onSelectProfile(p.id)}
+                    style={{
+                      minWidth: 150, width: 150, background: "white", border: isActive ? `2px solid ${p.color}` : "1.5px solid #e2e8f0",
+                      borderRadius: 12, padding: "20px 12px", textAlign: "center", cursor: "pointer",
+                      boxShadow: isActive ? "0 4px 12px rgba(0,0,0,0.05)" : "none",
+                      transition: "all 0.2s", position: "relative"
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 8px 16px rgba(0,0,0,0.05)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = isActive ? "0 4px 12px rgba(0,0,0,0.05)" : "none"; }}
+                  >
+                    <span style={{ position: "absolute", top: 12, right: 12, width: 8, height: 8, borderRadius: "50%", background: p.color }} />
+                    
+                    <div style={{ margin: "0 auto 12px", width: 60, height: 60 }}>
+                      <ProfileAvatar profile={p} size={60} />
+                    </div>
 
-                  {/* Name */}
-                  <div style={{ fontWeight: 600, fontSize: 13, color: "#0f172a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {p.lastName.toUpperCase()} {p.firstName}
-                  </div>
+                    <div style={{ fontWeight: 700, fontSize: 13, color: p.color, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {p.lastName.toUpperCase()} {p.firstName}
+                    </div>
 
-                  {/* Last Active */}
-                  <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 8 }}>
-                    Dernière session
+                    <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 8 }}>
+                      Dernière session
+                    </div>
+                    <div style={{ fontSize: 10, color: "#475569", fontWeight: 600, marginTop: 2 }}>
+                      {p.lastActive}
+                    </div>
                   </div>
-                  <div style={{ fontSize: 10, color: "#64748b", fontWeight: 500 }}>
-                    {p.lastActive}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
 
             {/* Guest Profile Card */}
             <div 
               onClick={() => onSelectProfile("guest")}
               style={{
-                minWidth: 160, width: 160, background: "white", border: activeProfileId === "guest" ? "2px solid #64748b" : "1px solid #e2e8f0",
-                borderRadius: 12, padding: "24px 16px", textAlign: "center", cursor: "pointer", transition: "all 0.2s", position: "relative"
+                minWidth: 150, width: 150, background: "white", border: activeProfileId === "guest" ? "2px solid #64748b" : "1.5px solid #e2e8f0",
+                borderRadius: 12, padding: "20px 12px", textAlign: "center", cursor: "pointer", transition: "all 0.2s", position: "relative"
               }}
               onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 8px 16px rgba(0,0,0,0.05)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}
             >
-              <span style={{ position: "absolute", top: 15, right: 15, width: 8, height: 8, borderRadius: "50%", background: "#64748b" }} />
+              <span style={{ position: "absolute", top: 12, right: 12, width: 8, height: 8, borderRadius: "50%", background: "#64748b" }} />
               
-              <div style={{ 
-                width: 60, height: 60, borderRadius: "50%", background: "#f1f5f9", color: "#64748b",
-                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700,
-                margin: "0 auto 12px"
-              }}>
-                👤
+              <div style={{ margin: "0 auto 12px", width: 60, height: 60 }}>
+                <ProfileAvatar profile={{ id: "guest" }} size={60} />
               </div>
 
-              <div style={{ fontWeight: 600, fontSize: 13, color: "#0f172a" }}>
+              <div style={{ fontWeight: 700, fontSize: 13, color: "#475569" }}>
                 Mode invité
               </div>
 
               <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 8 }}>
                 Continuer sans compte
               </div>
-              <div style={{ fontSize: 10, color: "#64748b", fontWeight: 500 }}>
+              <div style={{ fontSize: 10, color: "#64748b", fontWeight: 600, marginTop: 2 }}>
                 Aucune sauvegarde
               </div>
             </div>
           </div>
         </div>
 
-        {/* New User Banner */}
+        {/* Nouvelle utilisateur Panel Button */}
         <div 
           onClick={onOpenNewUserModal}
           style={{
-            background: "white", borderRadius: 12, border: "1px solid #e2e8f0", padding: "16px 24px",
+            background: "white", borderRadius: 12, border: "1.5px solid #e2e8f0", padding: "16px 24px",
             display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
-            transition: "all 0.2s", marginBottom: 24, boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
+            transition: "all 0.15s", marginBottom: 24, boxShadow: "0 1px 2px rgba(15,23,42,0.02)"
           }}
           onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#3b82f6"; e.currentTarget.style.background = "#f8fafc"; }}
           onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "white"; }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <span style={{ fontSize: 24, color: "#3b82f6" }}>➕</span>
-            <div>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="8.5" cy="7" r="4" />
+              <line x1="20" y1="8" x2="20" y2="14" />
+              <line x1="23" y1="11" x2="17" y2="11" />
+            </svg>
+            <div style={{ textAlign: "left" }}>
               <div style={{ fontWeight: 600, fontSize: 14, color: "#0f172a" }}>Nouvelle utilisateur</div>
               <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>Créez un nouveau profil pour commencer</div>
             </div>
           </div>
-          <span style={{ fontSize: 18, color: "#94a3b8" }}>➔</span>
+          <span style={{ fontSize: 16, color: "#94a3b8", fontWeight: "bold" }}>➔</span>
         </div>
 
-        {/* Sync Banner */}
+        {/* Sync Blue Banner */}
         <div style={{ 
-          background: "#eff6ff", borderRadius: 12, border: "1px solid #bfdbfe", padding: "20px 24px",
-          display: "flex", justifyContent: "space-between", alignItems: "center"
+          background: "#eff6ff", borderRadius: 12, border: "1.5px solid #bfdbfe", padding: "20px 24px",
+          display: "flex", justifyContent: "space-between", alignItems: "center", gap: 20
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <span style={{ fontSize: 24 }}>☁️</span>
-            <div>
-              <div style={{ fontWeight: 600, fontSize: 14, color: "#1e3a8a" }}>Créer un compte IdeaGrid</div>
-              <div style={{ fontSize: 12, color: "#1e40af", marginTop: 2 }}>Créez un compte pour synchroniser vos tableaux sur tous vos appareils et ne jamais perdre vos données.</div>
+            <div style={{ textAlign: "left" }}>
+              <div style={{ fontWeight: 700, fontSize: 14, color: "#1e3a8a" }}>Créer un compte IdeaGrid</div>
+              <div style={{ fontSize: 12, color: "#2563eb", marginTop: 4, lineHeight: 1.4 }}>Créez un compte pour synchroniser vos tableaux sur tous vos appareils et ne jamais perdre vos données.</div>
             </div>
           </div>
           <button style={{
             background: "#3b82f6", color: "white", border: "none", borderRadius: 8,
-            padding: "10px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer"
+            padding: "10px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer", flexShrink: 0,
+            boxShadow: "0 2px 4px rgba(59,130,246,0.2)"
           }}>
             + Créer un compte
           </button>
@@ -1295,7 +1863,7 @@ function NewUserModal({ isOpen, onClose, onCreate }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.firstName || !form.lastName || !form.email) {
+    if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim()) {
       alert("Veuillez remplir tous les champs.");
       return;
     }
@@ -1308,7 +1876,7 @@ function NewUserModal({ isOpen, onClose, onCreate }) {
     <ModalBackdrop onClose={onClose}>
       <form onSubmit={handleSubmit} style={{
         background: "white", width: 440, maxWidth: "90%", borderRadius: 16,
-        padding: 24, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
+        padding: 26, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)", border: "1px solid #cbd5e1"
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: "#0f172a" }}>Nouveau profil utilisateur</h3>
@@ -1317,48 +1885,53 @@ function NewUserModal({ isOpen, onClose, onCreate }) {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 24 }}>
           <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>Prénom</label>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>Prénom</label>
             <input 
               value={form.firstName}
               onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-              placeholder="Ex: Aghiles"
-              style={{ width: "100%", padding: "10px 14px", border: "1px solid #cbd5e1", borderRadius: 8, outline: "none", fontSize: 13 }}
+              placeholder="Ex: Leticia"
+              style={{ width: "100%", padding: "10px 14px", border: "1px solid #cbd5e1", borderRadius: 8, outline: "none", fontSize: 13, color: "#0f172a" }}
+              autoFocus
             />
           </div>
           <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>Nom</label>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>Nom</label>
             <input 
               value={form.lastName}
               onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-              placeholder="Ex: ALKAMA"
-              style={{ width: "100%", padding: "10px 14px", border: "1px solid #cbd5e1", borderRadius: 8, outline: "none", fontSize: 13 }}
+              placeholder="Ex: LET"
+              style={{ width: "100%", padding: "10px 14px", border: "1px solid #cbd5e1", borderRadius: 8, outline: "none", fontSize: 13, color: "#0f172a" }}
             />
           </div>
           <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>Adresse mail</label>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>Adresse mail</label>
             <input 
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="Ex: alkama@example.com"
-              style={{ width: "100%", padding: "10px 14px", border: "1px solid #cbd5e1", borderRadius: 8, outline: "none", fontSize: 13 }}
+              placeholder="Ex: leticia.let@example.com"
+              style={{ width: "100%", padding: "10px 14px", border: "1px solid #cbd5e1", borderRadius: 8, outline: "none", fontSize: 13, color: "#0f172a" }}
             />
           </div>
           <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#475569", marginBottom: 6 }}>Couleur du profil</label>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 8 }}>Couleur du profil</label>
             <div style={{ display: "flex", gap: 10 }}>
-              {["#22c55e", "#ea580c", "#3b82f6", "#a855f7", "#ec4899", "#ca8a04"].map(c => (
-                <button
-                  type="button"
-                  key={c}
-                  onClick={() => setForm({ ...form, color: c })}
-                  style={{
-                    width: 28, height: 28, borderRadius: "50%", background: c,
-                    border: form.color === c ? "3px solid #94a3b8" : "none",
-                    cursor: "pointer"
-                  }}
-                />
-              ))}
+              {["#22c55e", "#ea580c", "#3b82f6", "#a855f7", "#ec4899", "#ca8a04"].map(c => {
+                const isSelected = form.color === c;
+                return (
+                  <button
+                    type="button"
+                    key={c}
+                    onClick={() => setForm({ ...form, color: c })}
+                    style={{
+                      width: 28, height: 28, borderRadius: "50%", background: c,
+                      border: isSelected ? "3px solid #64748b" : "1px solid rgba(0,0,0,0.1)",
+                      cursor: "pointer", transition: "transform 0.1s",
+                      transform: isSelected ? "scale(1.1)" : "none"
+                    }}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>
@@ -1369,7 +1942,7 @@ function NewUserModal({ isOpen, onClose, onCreate }) {
             onClick={onClose}
             style={{
               padding: "8px 16px", border: "1px solid #cbd5e1", borderRadius: 8,
-              background: "white", color: "#334155", fontSize: 13, fontWeight: 500, cursor: "pointer"
+              background: "white", color: "#475569", fontSize: 13, fontWeight: 600, cursor: "pointer"
             }}
           >
             Annuler
@@ -1377,8 +1950,9 @@ function NewUserModal({ isOpen, onClose, onCreate }) {
           <button 
             type="submit"
             style={{
-              padding: "8px 16px", border: "none", borderRadius: 8,
-              background: "#3b82f6", color: "white", fontSize: 13, fontWeight: 600, cursor: "pointer"
+              padding: "8px 18px", border: "none", borderRadius: 8,
+              background: "#3b82f6", color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer",
+              boxShadow: "0 2px 4px rgba(59,130,246,0.15)"
             }}
           >
             Créer
@@ -1454,6 +2028,37 @@ export default function App() {
     });
   };
 
+  const activeProfile = profiles.find(p => p.id === activeProfileId) || null;
+  const [toastMessage, setToastMessage] = useState("");
+
+  const handleUpdateSwotBullet = (idx, newText) => {
+    updateCurrentCourse(prev => {
+      const bullets = prev.swotBullets ? [...prev.swotBullets] : [
+        { type: "force", label: "Force :", text: "", color: "#16a34a" },
+        { type: "faiblesse", label: "Faiblesse :", text: "", color: "#ea580c" },
+        { type: "opportunite", label: "Opportunité :", text: "", color: "#2563eb" },
+        { type: "menace", label: "Menace :", text: "", color: "#9333ea" }
+      ];
+      bullets[idx] = { ...bullets[idx], text: newText };
+      return { ...prev, swotBullets: bullets };
+    });
+  };
+
+  const handleSaveCourse = () => {
+    const updated = courses.map(c => c.id === currentCourseId ? activeCourse : c);
+    saveCours(activeProfileId, updated);
+    setToastMessage(`Le cours "${activeCourse.title}" a été sauvegardé.`);
+    setTimeout(() => setToastMessage(""), 3000);
+  };
+
+  const handleRenameCourse = (id, newTitle) => {
+    setCourses(prev => {
+      const updated = prev.map(c => c.id === id ? { ...c, title: newTitle } : c);
+      saveCours(activeProfileId, updated);
+      return updated;
+    });
+  };
+
   // Decode shared link on mount
   useEffect(() => {
     const hash = window.location.hash;
@@ -1482,7 +2087,18 @@ export default function App() {
     }
   }, [activeProfileId]);
 
-  // Web Speech API Voice recognition hook
+  // Web Speech API Voice recognition hook with ref closure fixes
+  const isRecordingRef = useRef(false);
+  const selectedColorRef = useRef(selectedColor);
+  useEffect(() => {
+    selectedColorRef.current = selectedColor;
+  }, [selectedColor]);
+
+  const addSpokenTextToBoardRef = useRef(null);
+  useEffect(() => {
+    addSpokenTextToBoardRef.current = addSpokenTextToBoard;
+  });
+
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
@@ -1494,21 +2110,29 @@ export default function App() {
 
     rec.onstart = () => {
       setIsRecording(true);
+      isRecordingRef.current = true;
       setSpeechText("");
     };
 
     rec.onerror = (e) => {
       console.error("Speech Recognition Error", e.error);
-      setIsRecording(false);
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        setIsRecording(false);
+        isRecordingRef.current = false;
+      }
     };
 
     rec.onend = () => {
-      if (isRecording) {
+      if (isRecordingRef.current) {
         try {
           rec.start();
-        } catch {
+        } catch (err) {
+          console.error("Failed to restart speech recognition", err);
           setIsRecording(false);
+          isRecordingRef.current = false;
         }
+      } else {
+        setIsRecording(false);
       }
     };
 
@@ -1528,18 +2152,21 @@ export default function App() {
       }
       if (final) {
         setSpeechText("");
-        addSpokenTextToBoard(final.trim());
+        if (addSpokenTextToBoardRef.current) {
+          addSpokenTextToBoardRef.current(final.trim());
+        }
       }
     };
 
     recognitionRef.current = rec;
 
     return () => {
+      isRecordingRef.current = false;
       try {
         rec.stop();
       } catch (e) {}
     };
-  }, [isRecording]);
+  }, []);
 
   const toggleRecording = () => {
     if (!recognitionRef.current) {
@@ -1547,12 +2174,15 @@ export default function App() {
       return;
     }
 
-    if (isRecording) {
+    if (isRecordingRef.current) {
+      isRecordingRef.current = false;
       setIsRecording(false);
       try {
         recognitionRef.current.stop();
       } catch (e) {}
     } else {
+      isRecordingRef.current = true;
+      setIsRecording(true);
       try {
         recognitionRef.current.start();
       } catch (e) {}
@@ -1568,7 +2198,7 @@ export default function App() {
       return {
         ...prev,
         description: newDesc,
-        descColor: selectedColor,
+        descColor: selectedColorRef.current || selectedColor,
         aiSummary: prev.aiSummary + " " + text
       };
     });
