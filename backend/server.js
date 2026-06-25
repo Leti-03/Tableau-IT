@@ -221,7 +221,7 @@ const seedDefaultCourse = () => {
           isPinned: false
         }
       ],
-      summary: 'La photosynthèse est le processus par lequel les plantes utilisent la lumière, le CO₂ et l\'eau pour produire du sucre et libérer de l\'oxygène.',
+      summary: 'Laa photosynthèse est le processus par lequel les plantes utilisent la lumière, le CO₂ et l\'eau pour produire du sucre et libérer de l\'oxygène.',
       aiState: {
         chatHistory: [
           { sender: 'ai', text: 'Bonjour ! Je suis votre Assistant IA. Posez-moi des questions sur le cours en cours ou demandez des résumés.' }
