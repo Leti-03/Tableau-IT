@@ -7,21 +7,16 @@ function genId() {
 
 // ── Default Course Templates ─────────────────────────────────────────────────
 const defaultCourse = {
-  id: "photosynthesis-default",
-  title: "La photosynthèse",
+  id: "course-default",
+  title: "Nouveau cours",
   description: "Commencer à écrire ou parlez au micro...",
-  descColor: "#16a34a",
-  pointsCles: [
-    "Les plantes absorbent la lumière",
-    "Elles utilisent le CO₂ et l'eau",
-    "Elles produisent du sucre",
-    "L'oxygène est rejeté dans l'air"
-  ],
-  question: "Pourquoi la lumière est-elle essentielle à la photosynthèse ?",
-  aiSummary: "La photosynthèse est le processus par lequel les plantes utilisent la lumière, le CO₂ et l'eau pour produire du sucre et libérer de l'oxygène.",
+  descColor: "#3b82f6",
+  pointsCles: ["Nouveau point clé..."],
+  question: "Entrez votre question clé ici...",
+  aiSummary: "L'assistant IA résumera le cours.",
   cards: [],
   dateLabel: "Aujourd'hui",
-  timeLabel: "10:45"
+  timeLabel: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
 };
 
 const swotCourse = {
@@ -1729,6 +1724,578 @@ function HistoryView({ courses, activeId, onLoad, onDelete, onRename }) {
   );
 }
 
+// ── Share View Component ────────────────────────────────────────────────────────
+function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
+  const [inviteInput, setInviteInput] = useState("");
+  const [inviteRole, setInviteRole] = useState("Peut modifier");
+  const [collaborators, setCollaborators] = useState(() => {
+    const key = `ideagrid_collaborators_${activeProfile?.id || "guest"}`;
+    const saved = localStorage.getItem(key);
+    if (saved) return JSON.parse(saved);
+    return [
+      { id: "collab-1", name: "Marie Dupont", email: "marie.dupont@ecole.fr", role: "Peut modifier", color: "#a855f7" },
+      { id: "collab-2", name: "Lucas Martin", email: "lucas.martin@ecole.fr", role: "Peut commenter", color: "#22c55e" },
+      { id: "collab-3", name: "Classe 2nde 3", email: "classe2nde3@ecole.fr", role: "Peut consulter", color: "#ea580c" }
+    ];
+  });
+
+  const handleAddCollaborator = async (e) => {
+    e.preventDefault();
+    if (!inviteInput.trim()) return;
+
+    const text = inviteInput.trim();
+    const isEmail = text.includes("@");
+    const email = isEmail ? text : `${text.toLowerCase().replace(/\s+/g, ".")}@ecole.fr`;
+    const name = isEmail ? text.split("@")[0].split(".").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ") : text;
+    
+    const colors = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899"];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+    const newCollab = {
+      id: "collab-" + Date.now(),
+      name,
+      email,
+      role: inviteRole,
+      color: randomColor
+    };
+
+    const updated = [...collaborators, newCollab];
+    setCollaborators(updated);
+    const key = `ideagrid_collaborators_${activeProfile?.id || "guest"}`;
+    localStorage.setItem(key, JSON.stringify(updated));
+    setInviteInput("");
+
+    try {
+      const courseLink = `${window.location.origin}/#course=${encodeCourse(activeCourse)}`;
+      const response = await fetch('/api/share-course', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          courseTitle: activeCourse.title,
+          role: inviteRole,
+          courseLink,
+          senderName: activeProfile ? `${activeProfile.firstName} ${activeProfile.lastName}` : "Invité"
+        })
+      });
+      const result = await response.json();
+      if (result.success) {
+        setToastMessage(`Invitation envoyée par email à ${email} !`);
+        setTimeout(() => setToastMessage(""), 4000);
+      } else {
+        console.error("API error sharing course", result);
+        setToastMessage(`Erreur d'envoi. Collaborateur ajouté localement.`);
+        setTimeout(() => setToastMessage(""), 3000);
+      }
+    } catch (err) {
+      console.error("Network error sharing course", err);
+      setToastMessage(`Collaborateur ${name} ajouté localement.`);
+      setTimeout(() => setToastMessage(""), 3000);
+    }
+  };
+
+  const handleRemoveCollaborator = (id) => {
+    const updated = collaborators.filter(c => c.id !== id);
+    setCollaborators(updated);
+    const key = `ideagrid_collaborators_${activeProfile?.id || "guest"}`;
+    localStorage.setItem(key, JSON.stringify(updated));
+  };
+
+  const handleRoleChange = (id, newRole) => {
+    const updated = collaborators.map(c => c.id === id ? { ...c, role: newRole } : c);
+    setCollaborators(updated);
+    const key = `ideagrid_collaborators_${activeProfile?.id || "guest"}`;
+    localStorage.setItem(key, JSON.stringify(updated));
+  };
+
+  const handleCopyLink = () => {
+    const shareLink = `${window.location.origin}/#course=${encodeCourse(activeCourse)}`;
+    navigator.clipboard.writeText(shareLink).then(() => {
+      setToastMessage("Lien de partage copié dans le presse-papiers !");
+      setTimeout(() => setToastMessage(""), 3000);
+    }).catch(err => {
+      console.error("Failed to copy link", err);
+    });
+  };
+
+  const handleExportPDF = () => {
+    window.print();
+  };
+
+  const handleExportJSON = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(activeCourse, null, 2));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute("href", dataStr);
+    dlAnchorElem.setAttribute("download", `${activeCourse.title.toLowerCase().replace(/\s+/g, "_")}_ideagrid.json`);
+    dlAnchorElem.click();
+    setToastMessage("Fichier IdeaGrid JSON téléchargé !");
+    setTimeout(() => setToastMessage(""), 3000);
+  };
+
+  const handleExportSVG = () => {
+    let cardG = '';
+    (activeCourse.cards || []).forEach((c) => {
+      cardG += `
+      <g transform="translate(${c.x || 100}, ${c.y || 100})">
+        <rect width="220" height="130" rx="8" fill="${c.color || '#eff6ff'}" stroke="#cbd5e1" stroke-width="1.5" />
+        <circle cx="200" cy="15" r="5" fill="#ef4444" />
+        <text x="15" y="30" font-family="sans-serif" font-size="13" font-weight="bold" fill="#0f172a">${c.title || 'Notes'}</text>
+        <text x="15" y="55" font-family="sans-serif" font-size="12" fill="#334155">${c.content || ''}</text>
+      </g>`;
+    });
+
+    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1000" width="1000" height="830" style="background:#f8fafc; font-family: sans-serif;">
+      <rect width="1200" height="1000" fill="#f8fafc"/>
+      <rect width="1200" height="80" fill="#0f172a" />
+      <text x="40" y="48" font-family="sans-serif" font-size="20" font-weight="bold" fill="#ffffff">IdeaGrid Smart Whiteboard</text>
+      
+      <text x="60" y="150" font-family="sans-serif" font-size="32" font-weight="bold" fill="#1e293b">${activeCourse.title}</text>
+      <text x="60" y="210" font-family="sans-serif" font-size="16" fill="#2563eb" font-weight="bold">Description du cours :</text>
+      <text x="60" y="240" font-family="cursive, sans-serif" font-size="18" fill="#334155">${activeCourse.description || ''}</text>
+      
+      <text x="650" y="150" font-family="sans-serif" font-size="22" font-weight="bold" fill="#2563eb">Points clés</text>
+      ${(activeCourse.pointsCles || []).map((pt, idx) => `<text x="650" y="${190 + idx * 30}" font-family="sans-serif" font-size="14" fill="#475569">• ${pt}</text>`).join('')}
+      
+      <text x="650" y="${190 + (activeCourse.pointsCles || []).length * 30 + 30}" font-family="sans-serif" font-size="22" font-weight="bold" fill="#9333ea">Question Clé</text>
+      <text x="650" y="${190 + (activeCourse.pointsCles || []).length * 30 + 60}" font-family="sans-serif" font-size="14" fill="#475569">${activeCourse.question || ''}</text>
+      
+      ${cardG}
+    </svg>`;
+
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const svgUrl = URL.createObjectURL(svgBlob);
+    const downloadLink = document.createElement('a');
+    downloadLink.href = svgUrl;
+    downloadLink.download = `${activeCourse.title.toLowerCase().replace(/\s+/g, "_")}.svg`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    setToastMessage("Tableau exporté en SVG !");
+    setTimeout(() => setToastMessage(""), 3000);
+  };
+
+  const handleExportPNG = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1200;
+    canvas.height = 1000;
+    const ctx = canvas.getContext('2d');
+    
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, canvas.width, 80);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('IdeaGrid Smart Whiteboard', 40, 48);
+    
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 32px sans-serif';
+    ctx.fillText(activeCourse.title, 60, 150);
+    
+    ctx.fillStyle = '#2563eb';
+    ctx.font = '16px sans-serif';
+    ctx.fillText('Description du cours :', 60, 210);
+    
+    ctx.fillStyle = '#334155';
+    ctx.font = 'italic 18px cursive, sans-serif';
+    
+    const descText = activeCourse.description || "Aucune description...";
+    const words = descText.split(' ');
+    let line = '';
+    let y = 245;
+    const maxWidth = 550;
+    const lineHeight = 28;
+    
+    for (let n = 0; n < words.length; n++) {
+      let testLine = line + words[n] + ' ';
+      let metrics = ctx.measureText(testLine);
+      let testWidth = metrics.width;
+      if (testWidth > maxWidth && n > 0) {
+        ctx.fillText(line, 60, y);
+        line = words[n] + ' ';
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, 60, y);
+    
+    ctx.fillStyle = '#2563eb';
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillText('Points clés', 650, 150);
+    
+    ctx.fillStyle = '#475569';
+    ctx.font = '16px sans-serif';
+    let py = 195;
+    (activeCourse.pointsCles || []).forEach((pt) => {
+      ctx.fillText(`•  ${pt}`, 650, py);
+      py += 32;
+    });
+    
+    ctx.fillStyle = '#9333ea';
+    ctx.font = 'bold 22px sans-serif';
+    ctx.fillText('Question Clé', 650, py + 20);
+    
+    ctx.fillStyle = '#475569';
+    ctx.font = '16px sans-serif';
+    ctx.fillText(activeCourse.question || 'Pourquoi ?', 650, py + 55);
+    
+    (activeCourse.cards || []).forEach(card => {
+      const cx = card.x || 100;
+      const cy = card.y || 100;
+      
+      ctx.shadowColor = 'rgba(15, 23, 42, 0.08)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 4;
+      
+      ctx.fillStyle = card.color || '#eff6ff';
+      ctx.fillRect(cx, cy, 220, 130);
+      
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+      
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(cx, cy, 220, 130);
+      
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(cx + 200, cy + 15, 6, 0, 2 * Math.PI);
+      ctx.fill();
+      
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.fillText(card.title || 'Notes', cx + 15, cy + 30);
+      
+      ctx.fillStyle = '#334155';
+      ctx.font = '12px sans-serif';
+      
+      const contentText = card.content || '';
+      const cWords = contentText.split(' ');
+      let cLine = '';
+      let cyOffset = cy + 55;
+      for (let n = 0; n < cWords.length; n++) {
+        let testLine = cLine + cWords[n] + ' ';
+        let metrics = ctx.measureText(testLine);
+        if (metrics.width > 190 && n > 0) {
+          ctx.fillText(cLine, cx + 15, cyOffset);
+          cLine = cWords[n] + ' ';
+          cyOffset += 18;
+        } else {
+          cLine = testLine;
+        }
+      }
+      ctx.fillText(cLine, cx + 15, cyOffset);
+    });
+    
+    const dataURL = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = `${activeCourse.title.toLowerCase().replace(/\s+/g, '_')}.png`;
+    link.href = dataURL;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setToastMessage("Tableau exporté en PNG !");
+    setTimeout(() => setToastMessage(""), 3000);
+  };
+
+  const getInitials = (fullName) => {
+    return fullName.split(" ").map(s => s.charAt(0)).join("").toUpperCase().slice(0, 2);
+  };
+
+  return (
+    <div style={{ flex: 1, background: "#f8fafc", padding: "40px 60px", overflowY: "auto", display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ maxWidth: 900, width: "100%", margin: "0 auto", flex: 1 }}>
+        
+        <div style={{ marginBottom: 28 }}>
+          <h2 style={{ margin: 0, fontSize: 28, fontWeight: 700, color: "#0f172a" }}>Partager</h2>
+          <p style={{ margin: "4px 0 0 0", fontSize: 13, color: "#64748b" }}>Partagez votre tableau avec d'autres personnes ou exportez-le.</p>
+        </div>
+
+        <div style={{ display: "flex", gap: 30, alignItems: "flex-start" }}>
+          
+          <div style={{ flex: 1.5, display: "flex", flexDirection: "column", gap: 24 }}>
+            
+            <div style={{ background: "white", borderRadius: 12, border: "1px solid #cbd5e1", padding: 24, boxShadow: "0 1px 3px rgba(15,23,42,0.02)" }}>
+              <h3 style={{ margin: "0 0 16px 0", fontSize: 15, fontWeight: 600, color: "#0f172a" }}>Partager avec des personnes</h3>
+              
+              <form onSubmit={handleAddCollaborator} style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center" }}>
+                  <span style={{ position: "absolute", left: 12, color: "#94a3b8", fontSize: 14 }}>👤</span>
+                  <input 
+                    placeholder="Ajouter un nom, un e-mail ou un groupe..." 
+                    value={inviteInput}
+                    onChange={(e) => setInviteInput(e.target.value)}
+                    style={{ 
+                      padding: "10px 16px 10px 36px", borderRadius: 8, border: "1px solid #cbd5e1", 
+                      outline: "none", fontSize: 13, width: "100%", background: "white", color: "#1e293b"
+                    }}
+                  />
+                </div>
+                
+                <select 
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value)}
+                  style={{
+                    padding: "10px 12px", borderRadius: 8, border: "1px solid #cbd5e1",
+                    background: "white", outline: "none", fontSize: 13, color: "#334155", cursor: "pointer"
+                  }}
+                >
+                  <option value="Peut modifier">Peut modifier</option>
+                  <option value="Peut commenter">Peut commenter</option>
+                  <option value="Peut consulter">Peut consulter</option>
+                </select>
+
+                <button 
+                  type="submit"
+                  style={{
+                    background: "#2563eb", border: "none", borderRadius: 8, color: "white",
+                    padding: "10px 20px", cursor: "pointer", fontSize: 13, fontWeight: 600,
+                    boxShadow: "0 2px 4px rgba(37,99,235,0.15)", transition: "all 0.15s"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "#1d4ed8"}
+                  onMouseLeave={(e) => e.currentTarget.style.background = "#2563eb"}
+                >
+                  Inviter
+                </button>
+              </form>
+
+              <h4 style={{ margin: "24px 0 12px 0", fontSize: 13, fontWeight: 600, color: "#475569" }}>Personnes ayant accès</h4>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: "50%", background: "#eff6ff", color: "#3b82f6",
+                      display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, border: "1.5px solid #3b82f6"
+                    }}>
+                      {activeProfile ? getInitials(`${activeProfile.firstName} ${activeProfile.lastName}`) : "VI"}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b" }}>
+                        {activeProfile ? `${activeProfile.firstName} ${activeProfile.lastName.toUpperCase()}` : "Vous"} <span style={{ fontSize: 11, color: "#64748b", fontWeight: "normal" }}>(propriétaire)</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: "#64748b" }}>{activeProfile?.email || "vous@ideagrid.com"}</div>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 12, color: "#64748b", fontWeight: 500 }}>Propriétaire</span>
+                </div>
+
+                {collaborators.map(c => (
+                  <div key={c.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{
+                        width: 32, height: 32, borderRadius: "50%", background: `${c.color}15`, color: c.color,
+                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, border: `1.5px solid ${c.color}`
+                      }}>
+                        {getInitials(c.name)}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b" }}>{c.name}</div>
+                        <div style={{ fontSize: 11, color: "#64748b" }}>{c.email}</div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <select 
+                        value={c.role}
+                        onChange={(e) => handleRoleChange(c.id, e.target.value)}
+                        style={{
+                          border: "none", background: "transparent", fontSize: 12, color: "#64748b",
+                          fontWeight: 500, cursor: "pointer", outline: "none"
+                        }}
+                      >
+                        <option value="Peut modifier">Peut modifier</option>
+                        <option value="Peut commenter">Peut commenter</option>
+                        <option value="Peut consulter">Peut consulter</option>
+                      </select>
+
+                      <button 
+                        onClick={() => handleRemoveCollaborator(c.id)}
+                        style={{
+                          border: "none", background: "transparent", cursor: "pointer", color: "#94a3b8",
+                          fontSize: 14, padding: "2px 6px", display: "flex", alignItems: "center", justifyContent: "center",
+                          transition: "color 0.15s"
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = "#ef4444"}
+                        onMouseLeave={(e) => e.currentTarget.style.color = "#94a3b8"}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ background: "white", borderRadius: 12, border: "1px solid #cbd5e1", padding: 24, boxShadow: "0 1px 3px rgba(15,23,42,0.02)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontSize: 20, color: "#10b981" }}>🔗</span>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#1e293b" }}>Lien de partage</h4>
+                  <p style={{ margin: "2px 0 0 0", fontSize: 11, color: "#64748b" }}>Toute personne disposant du lien peut consulter. <span style={{ color: "#2563eb", cursor: "pointer" }}>Changer les permissions</span></p>
+                </div>
+              </div>
+              
+              <button 
+                onClick={handleCopyLink}
+                style={{
+                  background: "white", border: "1px solid #cbd5e1", borderRadius: 8, color: "#334155",
+                  padding: "8px 16px", cursor: "pointer", fontSize: 13, fontWeight: 500, transition: "all 0.15s"
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#94a3b8"; e.currentTarget.style.background = "#f8fafc"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#cbd5e1"; e.currentTarget.style.background = "white"; }}
+              >
+                Copier le lien
+              </button>
+            </div>
+          </div>
+
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 24 }}>
+            
+            <div style={{ background: "white", borderRadius: 12, border: "1px solid #cbd5e1", padding: 24, boxShadow: "0 1px 3px rgba(15,23,42,0.02)" }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#0f172a" }}>Exporter</h3>
+              <p style={{ margin: "4px 0 16px 0", fontSize: 11, color: "#64748b" }}>Téléchargez votre tableau dans différents formats.</p>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                
+                <button 
+                  onClick={handleExportPDF}
+                  style={{
+                    display: "flex", gap: 12, alignItems: "center", padding: 12, border: "1px solid #e2e8f0",
+                    borderRadius: 8, background: "white", width: "100%", cursor: "pointer", textAlign: "left", transition: "all 0.15s"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#94a3b8"; e.currentTarget.style.background = "#f8fafc"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "white"; }}
+                >
+                  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, background: "#fef2f2", color: "#ef4444", borderRadius: 6, fontSize: 14 }}>📄</span>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#1e293b" }}>Exporter en PDF</div>
+                    <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>Idéal pour l'impression ou le partage</div>
+                  </div>
+                </button>
+
+                <button 
+                  onClick={handleExportPNG}
+                  style={{
+                    display: "flex", gap: 12, alignItems: "center", padding: 12, border: "1px solid #e2e8f0",
+                    borderRadius: 8, background: "white", width: "100%", cursor: "pointer", textAlign: "left", transition: "all 0.15s"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#94a3b8"; e.currentTarget.style.background = "#f8fafc"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "white"; }}
+                >
+                  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, background: "#fdf4ff", color: "#d946ef", borderRadius: 6, fontSize: 14 }}>🖼️</span>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#1e293b" }}>Exporter en image (PNG)</div>
+                    <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>Image de haute qualité</div>
+                  </div>
+                </button>
+
+                <button 
+                  onClick={handleExportSVG}
+                  style={{
+                    display: "flex", gap: 12, alignItems: "center", padding: 12, border: "1px solid #e2e8f0",
+                    borderRadius: 8, background: "white", width: "100%", cursor: "pointer", textAlign: "left", transition: "all 0.15s"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#94a3b8"; e.currentTarget.style.background = "#f8fafc"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "white"; }}
+                >
+                  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, background: "#eff6ff", color: "#3b82f6", borderRadius: 6, fontSize: 14 }}>📐</span>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#1e293b" }}>Exporter en SVG</div>
+                    <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>Idéal pour une utilisation dans des présentations</div>
+                  </div>
+                </button>
+
+                <button 
+                  onClick={handleExportJSON}
+                  style={{
+                    display: "flex", gap: 12, alignItems: "center", padding: 12, border: "1px solid #e2e8f0",
+                    borderRadius: 8, background: "white", width: "100%", cursor: "pointer", textAlign: "left", transition: "all 0.15s"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#94a3b8"; e.currentTarget.style.background = "#f8fafc"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "white"; }}
+                >
+                  <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, background: "#fffbeb", color: "#f59e0b", borderRadius: 6, fontSize: 14 }}>💾</span>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: "#1e293b" }}>Exporter en fichier IdeaGrid</div>
+                    <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>Conserve toutes les fonctionnalités</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div style={{ background: "white", borderRadius: 12, border: "1px solid #cbd5e1", padding: 24, boxShadow: "0 1px 3px rgba(15,23,42,0.02)" }}>
+              <h3 style={{ margin: "0 0 16px 0", fontSize: 14, fontWeight: 600, color: "#0f172a" }}>Partager sur</h3>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                
+                <a 
+                  href={`https://classroom.google.com/share?url=${encodeURIComponent(window.location.origin + '/#course=' + encodeCourse(activeCourse))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex", gap: 10, alignItems: "center", padding: "10px 12px", border: "1px solid #e2e8f0",
+                    borderRadius: 8, background: "white", color: "#334155", textDecoration: "none", fontSize: 12, fontWeight: 500, transition: "all 0.15s"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#94a3b8"; e.currentTarget.style.background = "#f8fafc"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "white"; }}
+                >
+                  <span style={{ fontSize: 16 }}>🟢</span> Google Classroom
+                </a>
+
+                <a 
+                  href={`https://teams.microsoft.com/l/share?url=${encodeURIComponent(window.location.origin + '/#course=' + encodeCourse(activeCourse))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex", gap: 10, alignItems: "center", padding: "10px 12px", border: "1px solid #e2e8f0",
+                    borderRadius: 8, background: "white", color: "#334155", textDecoration: "none", fontSize: 12, fontWeight: 500, transition: "all 0.15s"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#94a3b8"; e.currentTarget.style.background = "#f8fafc"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "white"; }}
+                >
+                  <span style={{ fontSize: 16 }}>🟣</span> Microsoft Teams
+                </a>
+
+                <button 
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({
+                        title: activeCourse.title,
+                        text: `Découvrez mon tableau IdeaGrid: ${activeCourse.title}`,
+                        url: window.location.origin + '/#course=' + encodeCourse(activeCourse)
+                      });
+                    } else {
+                      handleCopyLink();
+                    }
+                  }}
+                  style={{
+                    display: "flex", gap: 10, alignItems: "center", padding: "10px 12px", border: "1px solid #e2e8f0",
+                    borderRadius: 8, background: "white", width: "100%", cursor: "pointer", textAlign: "left", color: "#334155", fontSize: 12, fontWeight: 500, transition: "all 0.15s"
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#94a3b8"; e.currentTarget.style.background = "#f8fafc"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e2e8f0"; e.currentTarget.style.background = "white"; }}
+                >
+                  <span style={{ fontSize: 16 }}>💬</span> Autres applications
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Full-screen Home View Component ────────────────────────────────────────────
 function HomeView({ profiles, activeProfileId, onSelectProfile, onOpenNewUserModal }) {
   return (
@@ -2241,8 +2808,6 @@ export default function App() {
       setShowAssistant(!showAssistant);
     } else if (id === "nouvelle") {
       handleCreateNewCourse();
-    } else if (id === "partager") {
-      setShowShare(true);
     } else {
       setActiveTab(id);
     }
@@ -2453,6 +3018,13 @@ export default function App() {
           onDelete={handleDeleteCourse}
           onRename={handleRenameCourse}
         />
+      ) : activeTab === "partager" ? (
+        <ShareView 
+          activeProfile={activeProfile}
+          courses={courses}
+          activeCourse={activeCourse}
+          setToastMessage={setToastMessage}
+        />
       ) : (
         <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
           <Whiteboard 
@@ -2520,7 +3092,7 @@ export default function App() {
             onPointerDown={handlePointerDown}
             draggingCard={draggingCard}
             onSave={handleSaveCourse}
-            onShare={() => setShowShare(true)}
+            onShare={() => setActiveTab("partager")}
             activeProfile={activeProfile}
             onUpdateSwotBullet={handleUpdateSwotBullet}
           />
@@ -2534,14 +3106,6 @@ export default function App() {
             />
           )}
         </div>
-      )}
-
-      {/* Share Modal Dialog */}
-      {showShare && (
-        <ShareModal 
-          course={activeCourse} 
-          onClose={() => setShowShare(false)} 
-        />
       )}
 
       {/* New User Creation Dialog */}

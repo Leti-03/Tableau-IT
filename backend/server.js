@@ -3,6 +3,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -129,6 +130,96 @@ app.delete('/api/courses/:id', (req, res) => {
     res.json({ success: true, message: 'Course deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete course', details: err.message });
+  }
+});
+
+app.post('/api/share-course', async (req, res) => {
+  const { email, courseTitle, role, courseLink, senderName } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  try {
+    let transporter;
+    
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpPort = process.env.SMTP_PORT || 587;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+
+    if (smtpHost && smtpUser && smtpPass) {
+      transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: parseInt(smtpPort),
+        secure: smtpPort == 465,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass
+        }
+      });
+      console.log('Using custom SMTP configuration.');
+    } else {
+      try {
+        const testAccount = await nodemailer.createTestAccount();
+        transporter = nodemailer.createTransport({
+          host: 'smtp.ethereal.email',
+          port: 587,
+          secure: false,
+          auth: {
+            user: testAccount.user,
+            pass: testAccount.pass
+          }
+        });
+        console.log('Using fallback Ethereal SMTP configuration.');
+      } catch (err) {
+        console.warn('Could not create Ethereal account, using mock transmitter.', err);
+      }
+    }
+
+    const mailOptions = {
+      from: smtpUser ? `"IdeaGrid" <${smtpUser}>` : '"IdeaGrid Support" <support@ideagrid.com>',
+      to: email,
+      subject: `${senderName || 'Quelqu\'un'} vous invite à collaborer sur "${courseTitle}"`,
+      text: `Bonjour,
+      
+${senderName || 'Quelqu\'un'} vous invite à rejoindre le cours "${courseTitle}" en tant que "${role || 'Lecteur'}" sur IdeaGrid.
+
+Vous pouvez accéder au cours partagé en cliquant sur le lien ci-dessous :
+${courseLink}
+
+L'équipe IdeaGrid`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
+          <h2 style="color: #2563eb;">Invitation à collaborer sur IdeaGrid</h2>
+          <p>Bonjour,</p>
+          <p><strong>${senderName || 'Quelqu\'un'}</strong> vous invite à rejoindre le tableau intelligent <strong>"${courseTitle}"</strong> avec les permissions suivantes : <strong>${role || 'Lecteur'}</strong>.</p>
+          <div style="margin: 24px 0;">
+            <a href="${courseLink}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Accéder au tableau partagé</a>
+          </div>
+          <p style="font-size: 12px; color: #64748b;">Si le bouton ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :<br/>${courseLink}</p>
+          <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;"/>
+          <p style="font-size: 12px; color: #94a3b8;">L'équipe IdeaGrid</p>
+        </div>
+      `
+    };
+
+    if (transporter) {
+      const info = await transporter.sendMail(mailOptions);
+      console.log('Email sent successfully:', info.messageId);
+      const previewUrl = nodemailer.getTestMessageUrl(info);
+      if (previewUrl) {
+        console.log('Preview URL:', previewUrl);
+        return res.json({ success: true, previewUrl });
+      }
+      return res.json({ success: true });
+    } else {
+      console.log('Mocking email delivery to:', email);
+      return res.json({ success: true, mock: true });
+    }
+  } catch (err) {
+    console.error('Error sending email:', err);
+    res.status(500).json({ error: 'Failed to send email', details: err.message });
   }
 });
 
