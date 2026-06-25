@@ -1,11 +1,14 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { ZoomIn, ZoomOut, Hand, Mic } from 'lucide-react';
+import { ZoomIn, ZoomOut, Hand, Mic, Save, Download } from 'lucide-react';
 import TitleCard from './cards/TitleCard';
 import TextCard from './cards/TextCard';
 import KeyPointsCard from './cards/KeyPointsCard';
 import ImageCard from './cards/ImageCard';
 import QuestionCard from './cards/QuestionCard';
 import DiagramCard from './cards/DiagramCard';
+import TranscriptionCard from './cards/TranscriptionCard';
+import ImagePlaceholderCard from './cards/ImagePlaceholderCard';
+import NoteCard from './cards/NoteCard';
 
 export default function Whiteboard({
   zoom,
@@ -24,7 +27,9 @@ export default function Whiteboard({
   onUpdateCardData,
   speechText,
   isRecording,
-  toggleRecording
+  toggleRecording,
+  onSave,
+  onExport
 }) {
   const canvasRef = useRef(null);
   const viewportRef = useRef(null);
@@ -32,6 +37,7 @@ export default function Whiteboard({
   const [isPanning, setIsPanning] = useState(false);
   const [currentPoints, setCurrentPoints] = useState([]);
   const dragStartCoords = useRef({ x: 0, y: 0 });
+
   // Size the canvas once
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -111,9 +117,11 @@ export default function Whiteboard({
   }, [strokes, currentPoints]);
 
   const getCanvasCoords = (clientX, clientY) => {
-    const rect = viewportRef.current.getBoundingClientRect();
-    const x = (clientX - rect.left) / zoom;
-    const y = (clientY - rect.top) / zoom;
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+    const x = (clientX - rect.left) * (canvas.width / rect.width);
+    const y = (clientY - rect.top) * (canvas.height / rect.height);
     return { x, y };
   };
 
@@ -175,14 +183,34 @@ export default function Whiteboard({
 
   return (
     <div className="whiteboard-container">
-      <button
-        type="button"
-        className={`floating-mic-btn ${isRecording ? 'recording' : ''}`}
-        onClick={toggleRecording}
-        title={isRecording ? "Arrêter la dictée vocale" : "Démarrer la dictée vocale"}
-      >
-        <Mic size={20} />
-      </button>
+      {/* Top Right Action Buttons (Micro, Save, Export) */}
+      <div className="whiteboard-top-actions">
+        <button
+          type="button"
+          className={`action-circle-btn ${isRecording ? 'recording' : ''}`}
+          onClick={toggleRecording}
+          title={isRecording ? "Arrêter la dictée vocale" : "Démarrer la dictée vocale"}
+        >
+          <Mic size={20} />
+        </button>
+        <button
+          type="button"
+          className="action-circle-btn"
+          onClick={onSave}
+          title="Sauvegarder le cours"
+        >
+          <Save size={20} />
+        </button>
+        <button
+          type="button"
+          className="action-circle-btn"
+          onClick={onExport}
+          title="Exporter le cours"
+        >
+          <Download size={20} />
+        </button>
+      </div>
+
       <div
         ref={viewportRef}
         className="whiteboard-viewport"
@@ -193,7 +221,7 @@ export default function Whiteboard({
         }}
         onMouseDown={(e) => {
           if (e.button !== 0) return;
-          if (e.target.closest('.wb-card') || e.target.closest('.whiteboard-controls') || e.target.closest('.card-delete-btn')) {
+          if (e.target.closest('.wb-card') || e.target.closest('.whiteboard-top-actions') || e.target.closest('.bottom-controls-container') || e.target.closest('.card-delete-btn')) {
             return;
           }
           handleStart(e.clientX, e.clientY);
@@ -201,7 +229,7 @@ export default function Whiteboard({
         onMouseMove={(e) => handleMove(e.clientX, e.clientY)}
         onMouseUp={handleEnd}
         onTouchStart={(e) => {
-          if (e.target.closest('.wb-card') || e.target.closest('.whiteboard-controls') || e.target.closest('.card-delete-btn')) {
+          if (e.target.closest('.wb-card') || e.target.closest('.whiteboard-top-actions') || e.target.closest('.bottom-controls-container') || e.target.closest('.card-delete-btn')) {
             return;
           }
           const touch = e.touches[0];
@@ -239,6 +267,12 @@ export default function Whiteboard({
                 return <TitleCard {...commonProps} content={card.content} color={card.color} />;
               case 'text':
                 return <TextCard {...commonProps} content={card.content} color={card.color} />;
+              case 'transcription':
+                return <TranscriptionCard {...commonProps} title={card.title} content={card.content} />;
+              case 'image-placeholder':
+                return <ImagePlaceholderCard {...commonProps} title={card.title} />;
+              case 'note':
+                return <NoteCard {...commonProps} title={card.title} content={card.content} />;
               case 'key-points':
                 return (
                   <KeyPointsCard
@@ -285,21 +319,30 @@ export default function Whiteboard({
         </div>
       )}
 
-      <div className="whiteboard-controls">
-        <button type="button" className="control-btn" onClick={zoomOut} title="Zoom arrière">
-          <ZoomOut size={18} strokeWidth={2} />
-        </button>
-        <span className="zoom-text">{Math.round(zoom * 100)}%</span>
-        <button type="button" className="control-btn" onClick={zoomIn} title="Zoom avant">
-          <ZoomIn size={18} strokeWidth={2} />
-        </button>
+      {/* Bottom controls: zoom pill and Recadrer button */}
+      <div className="bottom-controls-container">
+        <div className="zoom-control-pill">
+          <button type="button" className="zoom-btn-circle" onClick={zoomOut} title="Zoom arrière">
+            -
+          </button>
+          <span className="zoom-text" style={{ fontSize: '14px', fontWeight: 600, color: '#1e293b', minWidth: '42px' }}>
+            {Math.round(zoom * 100)}%
+          </span>
+          <button type="button" className="zoom-btn-circle" onClick={zoomIn} title="Zoom avant">
+            +
+          </button>
+        </div>
+
         <button
           type="button"
-          className={`control-btn ${tool === 'pan' ? 'active' : ''}`}
-          onClick={() => setTool(tool === 'pan' ? 'select' : 'pan')}
-          title="Activer le déplacement (Pan)"
+          className="recadrer-btn"
+          onClick={() => {
+            setZoom(1.0);
+            setPan({ x: 0, y: 0 });
+          }}
+          title="Recadrer l'affichage (100%)"
         >
-          <Hand size={18} />
+          👋 Recadrer
         </button>
       </div>
     </div>

@@ -35,7 +35,7 @@ export default function TitleCard({ id, x, y, content, color, zoom, tool, onUpda
         className="wb-card-title" 
         style={{ color: color || 'var(--wb-green)', cursor: tool === 'select' ? 'text' : 'inherit' }}
         onDoubleClick={() => {
-          if (tool === 'select') setIsEditing(true);
+          setIsEditing(true);
         }}
       >
         {isEditing ? (

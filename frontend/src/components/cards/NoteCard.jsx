@@ -1,7 +1,7 @@
 import React from 'react';
 import CardWrapper from './CardWrapper';
 
-export default function QuestionCard({ id, x, y, title, content, pinColor, zoom, tool, onUpdateCoords, onDelete, onUpdateCardData }) {
+export default function NoteCard({ id, x, y, title, content, zoom, tool, onUpdateCoords, onDelete, onUpdateCardData }) {
   const handleTitleBlur = (e) => {
     onUpdateCardData(id, { title: e.target.innerText });
   };
@@ -12,10 +12,10 @@ export default function QuestionCard({ id, x, y, title, content, pinColor, zoom,
 
   return (
     <CardWrapper id={id} x={x} y={y} zoom={zoom} tool={tool} onUpdateCoords={onUpdateCoords} onDelete={onDelete}>
-      <div className="wb-card-pinned wb-card-question" style={{ minWidth: '260px' }}>
-        <div className={`pushpin ${pinColor || 'pink'}`}></div>
+      <div className="wb-card-pinned wb-card-note" style={{ minWidth: '260px', borderColor: 'var(--color-border-light)' }}>
+        <div className="pushpin pink"></div>
         <div
-          className="wb-card-question-title"
+          className="wb-card-note-title"
           contentEditable
           suppressContentEditableWarning
           onBlur={handleTitleBlur}
@@ -23,16 +23,16 @@ export default function QuestionCard({ id, x, y, title, content, pinColor, zoom,
             fontFamily: 'var(--font-handwriting)',
             fontSize: '24px',
             fontWeight: 'bold',
-            color: 'var(--wb-purple)',
+            color: 'var(--wb-blue)',
             marginBottom: '8px',
             outline: 'none',
-            cursor: tool === 'select' ? 'text' : 'inherit'
+            cursor: 'text'
           }}
         >
-          {title || 'Question Clé'}
+          {title || 'Notes de cours'}
         </div>
         <div
-          className="wb-card-question-body"
+          className="wb-card-note-body"
           contentEditable
           suppressContentEditableWarning
           onBlur={handleContentBlur}
@@ -40,10 +40,10 @@ export default function QuestionCard({ id, x, y, title, content, pinColor, zoom,
             fontFamily: 'var(--font-handwriting)',
             fontSize: '20px',
             lineHeight: '1.4',
-            color: 'var(--wb-purple)',
+            color: '#64748b',
             outline: 'none',
             minHeight: '40px',
-            cursor: tool === 'select' ? 'text' : 'inherit'
+            cursor: 'text'
           }}
         >
           {content}

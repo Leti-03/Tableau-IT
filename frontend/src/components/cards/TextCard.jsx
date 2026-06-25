@@ -33,7 +33,7 @@ export default function TextCard({ id, x, y, content, color, zoom, tool, onUpdat
         className="wb-card-text" 
         style={{ color: color || 'var(--wb-dark)', minWidth: '200px' }}
         onDoubleClick={() => {
-          if (tool === 'select') setIsEditing(true);
+          setIsEditing(true);
         }}
       >
         {isEditing ? (

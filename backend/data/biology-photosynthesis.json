@@ -30,35 +30,13 @@
         "Les plantes absorbent la lumière",
         "Elles utilisent le CO₂ et l'eau",
         "Elles produisent du sucre",
-        "L'oxygène est rejeté dans l'air"
+        "L'oxygène est rejeté dans l'air",
+        "Double-cliquez pour éditer"
       ],
       "x": 520,
       "y": 130,
       "color": "#1565c0",
       "isPinned": false
-    },
-    {
-      "id": "card-4",
-      "type": "image",
-      "title": "Image ajoutée",
-      "imageUrl": "assets/leaf.svg",
-      "labels": [
-        {
-          "text": "Stomate",
-          "x": "80%",
-          "y": "30%"
-        },
-        {
-          "text": "Chloroplaste",
-          "x": "80%",
-          "y": "70%"
-        }
-      ],
-      "x": 520,
-      "y": 330,
-      "color": "#2e7d32",
-      "isPinned": true,
-      "pinColor": "blue"
     },
     {
       "id": "card-5",
@@ -91,5 +69,5 @@
     ]
   },
   "createdAt": "2026-06-25T00:17:33.175Z",
-  "updatedAt": "2026-06-25T10:16:30.003Z"
+  "updatedAt": "2026-06-25T10:36:30.000Z"
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 export default function Header({ isRecording, subject, title, onUpdateTitle }) {
-  const [time, setTime] = useState('10:45');
+  const [time, setTime] = useState('22:58');
 
   useEffect(() => {
     const updateTime = () => {
@@ -28,43 +28,54 @@ export default function Header({ isRecording, subject, title, onUpdateTitle }) {
   };
 
   return (
-    <header className="status-bar">
-      <div className="status-left">
-        {isRecording && (
-          <div className="recording-badge">
-            <span className="red-dot"></span>
-            <span className="recording-text">Microphone actif...</span>
-          </div>
-        )}
-      </div>
-      
-      <div className="status-center">
-        <div className="course-meta">
-          Cours : <span>{subject}</span> – <span
+    <header className="status-bar" style={{ backgroundColor: 'var(--bg-sidebar)', padding: '0 24px', borderBottom: '1px solid var(--color-border)' }}>
+      <div className="status-left" style={{ width: 'auto', flex: 1 }}>
+        <div className="course-meta" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px' }}>
+          <span style={{ color: '#1b6df5', fontSize: '24px', lineHeight: 1, marginRight: '4px' }}>•</span>
+          <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 500 }}>Cours :</span>
+          <span
             contentEditable
             suppressContentEditableWarning
             onBlur={handleTitleBlur}
             onKeyDown={handleKeyDown}
+            style={{
+              color: '#ffffff',
+              fontWeight: 600,
+              borderBottom: '1px dashed rgba(255, 255, 255, 0.3)',
+              padding: '0 4px',
+              outline: 'none',
+              cursor: 'text'
+            }}
           >
             {title}
           </span>
         </div>
       </div>
       
-      <div className="status-right">
-        <span className="status-time">{time}</span>
-        {/* State icons (Wifi, Cellular, Battery) */}
-        <svg className="status-sys-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M15.384 6.115a.485.485 0 0 0-.047-.736A12.444 12.444 0 0 0 8 3 12.44 12.44 0 0 0 .663 5.379a.485.485 0 0 0-.048.736.518.518 0 0 0 .668.05A11.448 11.448 0 0 1 8 4c2.507 0 4.827.802 6.716 2.164.205.148.49.13.668-.049z"/>
-          <path d="M13.229 8.271a.482.482 0 0 0-.063-.745A9.455 9.455 0 0 0 8 6c-1.905 0-3.68.56-5.166 1.526a.48.48 0 0 0-.063.745.525.525 0 0 0 .652.065A8.46 8.46 0 0 1 8 7a8.46 8.46 0 0 1 4.577 1.336c.205.132.48.108.652-.065zm-2.183 2.183c.226-.226.185-.605-.1-.75A6.473 6.473 0 0 0 8 9c-1.187 0-2.302.318-3.267.872-.29.15-.331.528-.105.754a.53.53 0 0 0 .69.043A5.479 5.479 0 0 1 8 10c1.07 0 2.059.307 2.894.84a.53.53 0 0 0 .68-.043zM8 12a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+      <div className="status-right" style={{ width: 'auto', display: 'flex', gap: '16px', alignItems: 'center', color: '#ffffff' }}>
+        <span className="status-time" style={{ color: '#ffffff', fontSize: '13px', fontWeight: 500, marginRight: '4px' }}>{time}</span>
+        
+        {/* Signal Strength Icon */}
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor" style={{ opacity: 0.8 }}>
+          <rect x="1" y="10" width="2" height="4" rx="0.5" />
+          <rect x="5" y="7" width="2" height="7" rx="0.5" />
+          <rect x="9" y="4" width="2" height="10" rx="0.5" />
+          <rect x="13" y="1" width="2" height="13" rx="0.5" />
+          <rect x="17" y="0" width="2" height="14" rx="0.5" fill="rgba(255, 255, 255, 0.3)" />
         </svg>
-        <svg className="status-sys-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H2zm0 1h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/>
-          <path d="M2 10a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-3zm3-3a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7zm3-2a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V5zm3-2a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V3z"/>
+
+        {/* Battery Icon */}
+        <svg width="22" height="14" viewBox="0 0 22 14" fill="currentColor" style={{ opacity: 0.8 }}>
+          <rect x="1" y="1" width="16" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          <rect x="4" y="4" width="10" height="6" rx="0.5" />
+          <path d="M19.5 4.5v5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
         </svg>
-        <svg className="status-sys-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <rect width="12" height="7" x="1" y="4.5" rx="1.5" fill="currentColor"/>
-          <path d="M14 6v4"/>
+
+        {/* Computer Screen Icon */}
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor" style={{ opacity: 0.8 }}>
+          <rect x="1" y="1" width="16" height="10" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          <line x1="9" y1="11" x2="9" y2="13" stroke="currentColor" strokeWidth="1.5" />
+          <line x1="5" y1="13" x2="13" y2="13" stroke="currentColor" strokeWidth="1.5" />
         </svg>
       </div>
     </header>

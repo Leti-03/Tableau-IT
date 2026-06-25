@@ -1,9 +1,8 @@
 import React from 'react';
 import { 
-  LayoutGrid, 
   Pencil, 
   MousePointerSquareDashed, 
-  Eraser, 
+  Trash2, 
   Bot, 
   Clock, 
   FilePlus2, 
@@ -26,7 +25,7 @@ export default function Sidebar({
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <LayoutGrid className="brand-icon" />
+        <div className="brand-logo-ig">IG</div>
         <span className="brand-text">IdeaGrid</span>
       </div>
       
@@ -58,7 +57,7 @@ export default function Sidebar({
           onClick={() => setTool('eraser')}
           title="Gomme"
         >
-          <Eraser className="nav-icon" />
+          <Trash2 className="nav-icon" />
           <span className="nav-label">Effacer</span>
         </button>
         
@@ -72,7 +71,7 @@ export default function Sidebar({
           title="Activer l'assistant IA"
         >
           <div className="ai-nav-icon-container">
-            <Bot className="nav-icon" style={{ strokeWidth: 2.5 }} />
+            <Bot className="nav-icon" style={{ strokeWidth: 2.2 }} />
           </div>
           <span className="nav-label">Assistant IA</span>
         </button>
