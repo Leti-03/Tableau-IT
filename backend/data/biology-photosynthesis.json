@@ -1,0 +1,95 @@
+{
+  "id": "biology-photosynthesis",
+  "title": "Photosynthèse",
+  "subject": "Biologie",
+  "canvasData": "{\"strokes\":[{\"points\":[{\"x\":206,\"y\":8},{\"x\":206,\"y\":7}],\"color\":\"#2b2b2b\",\"width\":3}]}",
+  "cardsData": [
+    {
+      "id": "card-1",
+      "type": "title",
+      "content": "La photosynthèse",
+      "x": 200,
+      "y": 70,
+      "color": "#2e7d32",
+      "isPinned": false
+    },
+    {
+      "id": "card-2",
+      "type": "text",
+      "content": "La photosynthèse est le processus utilisé par les plantes pour fabriquer leur propre nourriture à partir de la lumière.",
+      "x": 150,
+      "y": 180,
+      "color": "#212121",
+      "isPinned": false
+    },
+    {
+      "id": "card-3",
+      "type": "key-points",
+      "title": "Points clés",
+      "content": [
+        "Les plantes absorbent la lumière",
+        "Elles utilisent le CO₂ et l'eau",
+        "Elles produisent du sucre",
+        "L'oxygène est rejeté dans l'air"
+      ],
+      "x": 520,
+      "y": 130,
+      "color": "#1565c0",
+      "isPinned": false
+    },
+    {
+      "id": "card-4",
+      "type": "image",
+      "title": "Image ajoutée",
+      "imageUrl": "assets/leaf.svg",
+      "labels": [
+        {
+          "text": "Stomate",
+          "x": "80%",
+          "y": "30%"
+        },
+        {
+          "text": "Chloroplaste",
+          "x": "80%",
+          "y": "70%"
+        }
+      ],
+      "x": 520,
+      "y": 330,
+      "color": "#2e7d32",
+      "isPinned": true,
+      "pinColor": "blue"
+    },
+    {
+      "id": "card-5",
+      "type": "question",
+      "title": "Question",
+      "content": "Pourquoi la lumière est-elle essentielle à la photosynthèse ?",
+      "x": 520,
+      "y": 580,
+      "color": "#6a1b9a",
+      "isPinned": true,
+      "pinColor": "purple"
+    },
+    {
+      "id": "card-6",
+      "type": "diagram",
+      "title": "Schéma",
+      "imageUrl": "assets/plant.svg",
+      "x": 130,
+      "y": 280,
+      "isPinned": false
+    }
+  ],
+  "summary": "La photosynthèse est le processus par lequel les plantes utilisent la lumière, le CO₂ et l'eau pour produire du sucre et libérer de l'oxygène.",
+  "aiState": {
+    "chatHistory": [
+      {
+        "sender": "ai",
+        "text": "Bonjour ! Je suis votre Assistant IA. Posez-moi des questions sur le cours en cours ou demandez des résumés."
+      }
+    ]
+  },
+  "createdAt": "2026-06-25T00:17:33.175Z",
+  "updatedAt": "2026-06-25T10:16:30.003Z"
+}

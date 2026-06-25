@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200" width="100%" height="100%">
+  <defs>
+    <!-- Filter to create a sketch-like hand-drawn effect -->
+    <filter id="hand-drawn-leaf" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+    
+    <linearGradient id="cell-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c8e6c9" />
+      <stop offset="50%" stop-color="#a5d6a7" />
+      <stop offset="100%" stop-color="#81c784" />
+    </linearGradient>
+    
+    <linearGradient id="chloroplast-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#a5d6a7" />
+      <stop offset="100%" stop-color="#1b5e20" />
+    </linearGradient>
+  </defs>
+
+  <style>
+    .cell-wall { stroke: #2e7d32; stroke-width: 2; fill: url(#cell-bg); stroke-linecap: round; stroke-linejoin: round; filter: url(#hand-drawn-leaf); }
+    .stoma-guard { stroke: #1b5e20; stroke-width: 1.5; fill: #d4e157; filter: url(#hand-drawn-leaf); }
+    .stoma-pore { fill: #33691e; filter: url(#hand-drawn-leaf); }
+    .chloroplast { fill: #2e7d32; stroke: #1b5e20; stroke-width: 0.8; filter: url(#hand-drawn-leaf); }
+    
+    /* Handwriting label styles */
+    .hand-label { font-family: 'Caveat', 'Architects Daughter', cursive, sans-serif; font-size: 20px; fill: #212121; }
+    .arrow-line { stroke: #212121; stroke-width: 1.5; fill: none; marker-end: url(#lbl-arrow); }
+  </style>
+
+  <!-- Markers for arrows -->
+  <defs>
+    <marker id="lbl-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#212121" />
+    </marker>
+  </defs>
+
+  <!-- Group for Leaf Image (on the left, width around 180) -->
+  <g transform="translate(5, 5)">
+    <!-- Border clip path for the image box -->
+    <rect x="0" y="0" width="180" height="190" rx="8" fill="none" stroke="#81c784" stroke-width="2" />
+    
+    <g clip-path="url(#image-clip)">
+      <clipPath id="image-clip">
+        <rect x="1" y="1" width="178" height="188" rx="7" />
+      </clipPath>
+      
+      <!-- Cells -->
+      <polygon class="cell-wall" points="-10 -10, 50 -5, 60 40, -5 50" />
+      <polygon class="cell-wall" points="50 -5, 130 -10, 140 35, 60 40" />
+      <polygon class="cell-wall" points="130 -10, 190 -5, 185 45, 140 35" />
+      
+      <polygon class="cell-wall" points="-5 50, 60 40, 70 100, 10 110" />
+      <!-- Stoma cell -->
+      <polygon class="cell-wall" points="60 40, 140 35, 160 90, 130 120, 70 100" />
+      <polygon class="cell-wall" points="140 35, 190 -5, 195 60, 160 90" />
+      
+      <polygon class="cell-wall" points="10 110, 70 100, 60 170, -10 160" />
+      <polygon class="cell-wall" points="70 100, 130 120, 115 180, 60 170" />
+      <polygon class="cell-wall" points="130 120, 160 90, 195 140, 175 185, 115 180" />
+
+      <!-- Chloroplasts in cells -->
+      <ellipse class="chloroplast" cx="25" cy="20" rx="6" ry="4" transform="rotate(15, 25, 20)" />
+      <ellipse class="chloroplast" cx="35" cy="35" rx="5.5" ry="3.5" transform="rotate(-10, 35, 35)" />
+      <ellipse class="chloroplast" cx="100" cy="15" rx="6" ry="4" transform="rotate(25, 100, 15)" />
+      <ellipse class="chloroplast" cx="115" cy="25" rx="5.5" ry="3.5" transform="rotate(-15, 115, 25)" />
+      
+      <ellipse class="chloroplast" cx="30" cy="70" rx="6" ry="4" transform="rotate(30, 30, 70)" />
+      <ellipse class="chloroplast" cx="40" cy="85" rx="5" ry="3.5" transform="rotate(-5, 40, 85)" />
+
+      <!-- Chloroplasts in right cells -->
+      <ellipse class="chloroplast" cx="175" cy="45" rx="6" ry="4" transform="rotate(15, 175, 45)" />
+      <ellipse class="chloroplast" cx="170" cy="75" rx="5" ry="3.2" transform="rotate(-20, 170, 75)" />
+
+      <!-- Stoma Structure -->
+      <g transform="translate(105, 75)">
+        <ellipse class="stoma-pore" cx="0" cy="0" rx="7" ry="18" />
+        <path class="stoma-guard" d="M 0 -19 C -13 -15 -13 15 0 19 C -6 11 -6 -11 0 -19 Z" />
+        <path class="stoma-guard" d="M 0 -19 C 13 -15 13 15 0 19 C 6 11 6 -11 0 -19 Z" />
+        <circle class="chloroplast" cx="-5" cy="-7" r="2" />
+        <circle class="chloroplast" cx="-6" cy="4" r="2.2" />
+        <circle class="chloroplast" cx="5" cy="-6" r="2.1" />
+        <circle class="chloroplast" cx="6" cy="5" r="1.9" />
+      </g>
+    </g>
+  </g>
+
+  <!-- Labels and arrows on the right side of the card (outside image border) -->
+  
+  <!-- Arrow pointing to Stomate -->
+  <path class="arrow-line" d="M 235 60 H 115" />
+  <text class="hand-label" x="240" y="66">Stomate</text>
+  
+  <!-- Arrow pointing to Chloroplast -->
+  <path class="arrow-line" d="M 235 140 H 155" />
+  <text class="hand-label" x="240" y="146">Chloroplaste</text>
+</svg>

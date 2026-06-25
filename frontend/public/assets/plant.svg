@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Filter to create a sketch-like hand-drawn effect -->
+    <filter id="hand-drawn" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+    
+    <!-- Gradients -->
+    <radialGradient id="sun-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff9c4" />
+      <stop offset="70%" stop-color="#fbc02d" />
+      <stop offset="100%" stop-color="#f57f17" />
+    </radialGradient>
+    
+    <linearGradient id="leaf-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#81c784" />
+      <stop offset="100%" stop-color="#2e7d32" />
+    </linearGradient>
+
+    <linearGradient id="soil-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a1887f" />
+      <stop offset="100%" stop-color="#4e342e" />
+    </linearGradient>
+  </defs>
+
+  <style>
+    .sketch { stroke-linecap: round; stroke-linejoin: round; filter: url(#hand-drawn); }
+    .label { font-family: 'Caveat', 'Architects Daughter', cursive, sans-serif; font-size: 18px; fill: #2c3e50; }
+    .label-accent { font-weight: bold; }
+    .arrow { stroke: #546e7a; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+    .sun-ray { stroke: #fbc02d; stroke-width: 1.5; stroke-dasharray: 4 4; fill: none; }
+  </style>
+
+  <!-- Markers for Arrows -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#546e7a" />
+      <polygon id="arrowhead-blue" points="0 0, 10 3.5, 0 7" fill="#1565c0" />
+      <polygon id="arrowhead-green" points="0 0, 10 3.5, 0 7" fill="#2e7d32" />
+    </marker>
+  </defs>
+
+  <!-- BACKGROUND SOIL TEXTURE -->
+  <path class="sketch" d="M 120 370 Q 250 350 380 370 Q 250 400 120 370" fill="url(#soil-grad)" opacity="0.15" />
+  
+  <!-- PLANT ROOT SYSTEM -->
+  <!-- Main root -->
+  <path class="sketch" d="M 250 350 Q 255 380 250 420 Q 240 440 245 460" stroke="#795548" stroke-width="4" fill="none" />
+  <!-- Side roots -->
+  <path class="sketch" d="M 252 370 Q 220 390 200 410 Q 185 415 170 420" stroke="#8d6e63" stroke-width="2.5" fill="none" />
+  <path class="sketch" d="M 251 385 Q 210 420 220 450" stroke="#8d6e63" stroke-width="2" fill="none" />
+  <path class="sketch" d="M 252 390 Q 280 410 310 425 Q 330 430 350 435" stroke="#8d6e63" stroke-width="2.5" fill="none" />
+  <path class="sketch" d="M 250 410 Q 280 440 270 470" stroke="#8d6e63" stroke-width="2" fill="none" />
+  <!-- Fine root hairs -->
+  <path class="sketch" d="M 200 410 C 190 415 195 425 180 430" stroke="#a1887f" stroke-width="1" fill="none" />
+  <path class="sketch" d="M 310 425 C 320 430 315 440 330 445" stroke="#a1887f" stroke-width="1" fill="none" />
+
+  <!-- PLANT STEM -->
+  <path class="sketch" d="M 250 350 Q 250 250 248 180" stroke="#2e7d32" stroke-width="6" fill="none" />
+
+  <!-- LEAVES -->
+  <!-- Bottom Left Leaf -->
+  <path class="sketch" d="M 250 300 C 200 290 170 240 190 220 C 220 230 240 270 250 300 Z" fill="url(#leaf-grad)" stroke="#1b5e20" stroke-width="1.5" />
+  <!-- Leaf Vein -->
+  <path class="sketch" d="M 250 300 Q 215 260 190 220" stroke="#1b5e20" stroke-width="1" fill="none" />
+
+  <!-- Bottom Right Leaf -->
+  <path class="sketch" d="M 250 280 C 300 270 330 220 310 200 C 280 210 260 250 250 280 Z" fill="url(#leaf-grad)" stroke="#1b5e20" stroke-width="1.5" />
+  <!-- Leaf Vein -->
+  <path class="sketch" d="M 250 280 Q 285 240 310 200" stroke="#1b5e20" stroke-width="1" fill="none" />
+
+  <!-- Top Left Leaf -->
+  <path class="sketch" d="M 249 230 C 199 220 180 160 200 140 C 225 160 240 200 249 230 Z" fill="url(#leaf-grad)" stroke="#1b5e20" stroke-width="1.5" />
+  <path class="sketch" d="M 249 230 Q 219 180 200 140" stroke="#1b5e20" stroke-width="1" fill="none" />
+
+  <!-- Top Right Leaf -->
+  <path class="sketch" d="M 248 210 C 298 200 310 140 290 120 C 265 140 250 180 248 210 Z" fill="url(#leaf-grad)" stroke="#1b5e20" stroke-width="1.5" />
+  <path class="sketch" d="M 248 210 Q 278 160 290 120" stroke="#1b5e20" stroke-width="1" fill="none" />
+
+  <!-- Terminal Leaf -->
+  <path class="sketch" d="M 248 180 C 228 140 238 90 248 70 C 258 90 268 140 248 180 Z" fill="url(#leaf-grad)" stroke="#1b5e20" stroke-width="1.5" />
+  <path class="sketch" d="M 248 180 L 248 70" stroke="#1b5e20" stroke-width="1.5" fill="none" />
+
+  <!-- THE SUN -->
+  <g transform="translate(60, 60)">
+    <circle class="sketch" cx="0" cy="0" r="28" fill="url(#sun-grad)" stroke="#ef6c00" stroke-width="1.5" />
+    <!-- Rays -->
+    <path class="sketch sun-ray" d="M 0 -35 L 0 -48 M 0 35 L 0 48 M -35 0 L -48 0 M 35 0 L 48 0" />
+    <path class="sketch sun-ray" d="M -25 -25 L -34 -34 M 25 25 L 34 34 M -25 25 L -34 34 M 25 -25 L 34 -34" />
+  </g>
+
+  <!-- LIGHT LABEL & ARROWS -->
+  <text class="label label-accent" x="40" y="145" fill="#e65100">Lumière</text>
+  <path class="sketch arrow" d="M 90 115 Q 130 140 155 170" stroke="#ef6c00" />
+
+  <!-- WATER (H2O) INPUT -->
+  <text class="label" x="50" y="380" fill="#1565c0"><tspan fill="#1565c0" font-weight="bold">Eau</tspan> (H₂O)</text>
+  <path class="sketch arrow" d="M 125 380 Q 170 380 205 400" stroke="#1565c0" style="marker-end: url(#arrowhead-blue);" />
+
+  <!-- CARBON DIOXIDE (CO2) INPUT -->
+  <text class="label" x="70" y="270" fill="#37474f"><tspan font-weight="bold">CO₂</tspan></text>
+  <text class="label" x="30" y="295" font-size="14" fill="#37474f">(Dioxyde de carbone)</text>
+  <path class="sketch arrow" d="M 115 285 Q 165 295 190 290" stroke="#37474f" />
+
+  <!-- OXYGEN (O2) OUTPUT -->
+  <text class="label" x="420" y="240" fill="#2e7d32"><tspan font-weight="bold">O₂</tspan></text>
+  <text class="label" x="390" y="260" font-size="14" fill="#2e7d32">(Oxygène)</text>
+  <path class="sketch arrow" d="M 310 240 Q 360 220 385 225" stroke="#2e7d32" style="marker-end: url(#arrowhead-green);" />
+
+  <!-- SUGAR / GLUCOSE OUTPUT -->
+  <text class="label" x="410" y="340" fill="#6a1b9a"><tspan font-weight="bold">Sucre</tspan></text>
+  <text class="label" x="400" y="360" font-size="14" fill="#6a1b9a">(Glucose)</text>
+  <path class="sketch arrow" d="M 300 345 H 380" stroke="#6a1b9a" />
+</svg>

@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" width="100%" height="100%">
+  <defs>
+    <!-- Filter to create a sketch-like hand-drawn effect -->
+    <filter id="hand-drawn-leaf" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+    
+    <linearGradient id="cell-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a5d6a7" />
+      <stop offset="50%" stop-color="#81c784" />
+      <stop offset="100%" stop-color="#4caf50" />
+    </linearGradient>
+    
+    <linearGradient id="chloroplast-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#c8e6c9" />
+      <stop offset="100%" stop-color="#1b5e20" />
+    </linearGradient>
+  </defs>
+
+  <style>
+    .cell-wall { stroke: #2e7d32; stroke-width: 2.5; fill: url(#cell-bg); stroke-linecap: round; stroke-linejoin: round; filter: url(#hand-drawn-leaf); }
+    .stoma-guard { stroke: #1b5e20; stroke-width: 2; fill: #d4e157; filter: url(#hand-drawn-leaf); }
+    .stoma-pore { fill: #33691e; filter: url(#hand-drawn-leaf); }
+    .chloroplast { fill: #2e7d32; stroke: #1b5e20; stroke-width: 1; filter: url(#hand-drawn-leaf); }
+    .pointer-line { stroke: #37474f; stroke-width: 1; fill: none; }
+  </style>
+
+  <!-- BACKGROUND LEAF CELL TEXTURE -->
+  <!-- Let's draw several interlocking polygonal cells simulating plant epidermis cells -->
+  <!-- Row 1 -->
+  <polygon class="cell-wall" points="10 10, 80 15, 100 60, 40 70, 5 40" />
+  <polygon class="cell-wall" points="80 15, 160 10, 180 50, 100 60" />
+  <polygon class="cell-wall" points="160 10, 240 15, 260 55, 180 50" />
+  <polygon class="cell-wall" points="240 15, 295 10, 290 60, 260 55" />
+
+  <!-- Row 2 -->
+  <polygon class="cell-wall" points="40 70, 100 60, 110 120, 30 130" />
+  <!-- Center cell containing the stoma -->
+  <polygon class="cell-wall" points="100 60, 180 50, 210 110, 180 135, 110 120" />
+  <polygon class="cell-wall" points="180 50, 260 55, 270 120, 210 110" />
+
+  <!-- Row 3 -->
+  <polygon class="cell-wall" points="30 130, 110 120, 90 190, 10 180" />
+  <polygon class="cell-wall" points="110 120, 180 135, 165 195, 90 190" />
+  <polygon class="cell-wall" points="180 135, 270 120, 280 185, 230 195, 165 195" />
+
+  <!-- CHLOROPLASTS (in cells) -->
+  <!-- Cell 1 -->
+  <ellipse class="chloroplast" cx="30" cy="30" rx="8" ry="5" transform="rotate(15, 30, 30)" />
+  <ellipse class="chloroplast" cx="50" cy="45" rx="7" ry="4.5" transform="rotate(-10, 50, 45)" />
+  <ellipse class="chloroplast" cx="25" cy="55" rx="8" ry="5" transform="rotate(30, 25, 55)" />
+
+  <!-- Cell 2 -->
+  <ellipse class="chloroplast" cx="120" cy="25" rx="8" ry="5" transform="rotate(-20, 120, 25)" />
+  <ellipse class="chloroplast" cx="140" cy="35" rx="7.5" ry="5" transform="rotate(10, 140, 35)" />
+  
+  <!-- Cell 3 -->
+  <ellipse class="chloroplast" cx="60" cy="90" rx="8" ry="5" transform="rotate(45, 60, 90)" />
+  <ellipse class="chloroplast" cx="70" cy="110" rx="7" ry="4.5" transform="rotate(-5, 70, 110)" />
+
+  <!-- Cell 5 (Around stoma) -->
+  <ellipse class="chloroplast" cx="240" cy="80" rx="8" ry="5" transform="rotate(25, 240, 80)" />
+  <ellipse class="chloroplast" cx="230" cy="100" rx="7" ry="4.5" transform="rotate(-30, 230, 100)" />
+  <ellipse class="chloroplast" cx="250" cy="115" rx="8" ry="5" transform="rotate(15, 250, 115)" />
+
+  <!-- THE STOMA (L'OSTIOLE / STOMATE) -->
+  <!-- Placed in the center cell (100,60 to 210,110) -->
+  <g transform="translate(150, 95)">
+    <!-- Pore (ostiole) -->
+    <ellipse class="stoma-pore" cx="0" cy="0" rx="10" ry="24" />
+    
+    <!-- Guard cells (cellules de garde) -->
+    <!-- Left Guard Cell -->
+    <path class="stoma-guard" d="M 0 -25 C -18 -20 -18 20 0 25 C -8 15 -8 -15 0 -25 Z" />
+    <!-- Right Guard Cell -->
+    <path class="stoma-guard" d="M 0 -25 C 18 -20 18 20 0 25 C 8 15 8 -15 0 -25 Z" />
+    
+    <!-- Chloroplasts inside guard cells -->
+    <circle class="chloroplast" cx="-7" cy="-10" r="3" />
+    <circle class="chloroplast" cx="-8" cy="5" r="3.2" />
+    <circle class="chloroplast" cx="7" cy="-8" r="3.1" />
+    <circle class="chloroplast" cx="8" cy="7" r="2.9" />
+  </g>
+
+  <!-- INDICATOR ARROWS AND PINS WILL BE RENDERED VIA DOM OVERLAY -->
+</svg>
