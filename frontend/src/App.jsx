@@ -227,7 +227,7 @@ const Icons = {
 };
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
-function Sidebar({ activeTab, onTab }) {
+function Sidebar({ activeTab, onTab, activeProfile }) {
   const navTop = [
     { id: "ecrire",       icon: <Icons.Ecrire />,       label: "Écrire" },
     { id: "selectionner", icon: <Icons.Selectionner />, label: "Sélectionner" },
@@ -270,6 +270,41 @@ function Sidebar({ activeTab, onTab }) {
       </div>
       {navTop.map(btn)}
       <div style={{ flex: 1 }} />
+      
+      {/* Profile info badge at the bottom of the sidebar */}
+      {activeProfile ? (
+        <div style={{ 
+          margin: "0 16px 16px", padding: "10px 12px", borderRadius: 8, 
+          background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+          display: "flex", alignItems: "center", gap: 10
+        }}>
+          <ProfileAvatar profile={activeProfile} size={28} />
+          <div style={{ overflow: "hidden" }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "white", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {activeProfile.firstName} {activeProfile.lastName.toUpperCase()}
+            </div>
+            <div style={{ fontSize: 10, color: "#64748b", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {activeProfile.email}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{ 
+          margin: "0 16px 16px", padding: "10px 12px", borderRadius: 8, 
+          background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)",
+          display: "flex", alignItems: "center", gap: 10
+        }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: "50%", background: "#1e293b", color: "#94a3b8",
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0
+          }}>👤</div>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: "#94a3b8" }}>Mode Invité</div>
+            <div style={{ fontSize: 10, color: "#475569" }}>Sans sauvegarde</div>
+          </div>
+        </div>
+      )}
+
       {navBot.map(btn)}
     </aside>
   );
@@ -436,7 +471,7 @@ function Whiteboard({
   const [editingDesc, setEditingDesc] = useState(false);
   const [editingPtIndex, setEditingPtIndex] = useState(null);
   const [editingCardId, setEditingCardId] = useState(null);
-  const [showToolbar, setShowToolbar] = useState(true);
+  const [showToolbar, setShowToolbar] = useState(false);
   const [tempDesc, setTempDesc] = useState("");
   
   const [editingSwotIdx, setEditingSwotIdx] = useState(null);
@@ -1233,6 +1268,10 @@ function Whiteboard({
           from { transform: translate(-50%, 20px); opacity: 0; }
           to { transform: translate(-50%, 0); opacity: 1; }
         }
+        @keyframes toastSlideIn {
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
         .edit-hint {
           transition: opacity 0.2s;
         }
@@ -1973,7 +2012,7 @@ export default function App() {
   const [courses, setCourses] = useState([]);
   const [currentCourseId, setCurrentCourseId] = useState("");
   const [activeTab, setActiveTab] = useState("accueil"); // Default to welcome screen
-  const [showAssistant, setShowAssistant] = useState(true);
+  const [showAssistant, setShowAssistant] = useState(false);
   const [zoom, setZoom] = useState(100);
 
   // Modals visibility
@@ -2393,6 +2432,7 @@ export default function App() {
       <Sidebar 
         activeTab={activeTab} 
         onTab={handleTabChange} 
+        activeProfile={activeProfile}
       />
 
       {activeTab === "accueil" ? (
@@ -2419,6 +2459,7 @@ export default function App() {
             setActiveTab("ecrire");
           }}
           onDelete={handleDeleteCourse}
+          onRename={handleRenameCourse}
         />
       ) : (
         <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
@@ -2486,8 +2527,10 @@ export default function App() {
             }))}
             onPointerDown={handlePointerDown}
             draggingCard={draggingCard}
-            onSave={() => alert(`Le cours "${activeCourse.title}" a été sauvegardé avec succès dans votre historique.`)}
+            onSave={handleSaveCourse}
             onShare={() => setShowShare(true)}
+            activeProfile={activeProfile}
+            onUpdateSwotBullet={handleUpdateSwotBullet}
           />
 
           {showAssistant && (
@@ -2515,6 +2558,19 @@ export default function App() {
         onClose={() => setShowNewUserModal(false)}
         onCreate={handleCreateNewUser}
       />
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div style={{
+          position: "fixed", bottom: 24, right: 24, background: "#0f172a", color: "white",
+          padding: "12px 24px", borderRadius: 8, boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+          zIndex: 9999, display: "flex", alignItems: "center", gap: 10, fontSize: 13, fontWeight: 500,
+          border: "1px solid #1e293b", animation: "toastSlideIn 0.2s ease-out"
+        }}>
+          <span style={{ fontSize: 16 }}>💾</span>
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }
