@@ -134,6 +134,58 @@ app.delete('/api/courses/:id', (req, res) => {
   }
 });
 
+app.get('/api/email-diagnostics', async (req, res) => {
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = process.env.SMTP_PORT;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS ? 'configuré' : 'non défini';
+  const frontendUrl = process.env.FRONTEND_URL;
+
+  const diagnostics = {
+    env: {
+      FRONTEND_URL: frontendUrl || 'non défini',
+      SMTP_HOST: smtpHost || 'non défini',
+      SMTP_PORT: smtpPort || 'non défini',
+      SMTP_USER: smtpUser || 'non défini',
+      SMTP_PASS: smtpPass
+    },
+    vercelContact: null
+  };
+
+  if (frontendUrl) {
+    try {
+      const targetUrl = `${frontendUrl.replace(/\/$/, '')}/api/send-email`;
+      const start = Date.now();
+      
+      const fetchFn = typeof fetch !== 'undefined' ? fetch : globalThis.fetch;
+      if (!fetchFn) {
+        throw new Error('Fetch API non disponible');
+      }
+
+      const response = await fetchFn(targetUrl, {
+        method: 'OPTIONS',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      diagnostics.vercelContact = {
+        success: response.ok || response.status === 200,
+        status: response.status,
+        statusText: response.statusText,
+        timeMs: Date.now() - start
+      };
+    } catch (err) {
+      diagnostics.vercelContact = {
+        success: false,
+        error: err.message
+      };
+    }
+  }
+
+  res.json(diagnostics);
+});
+
 app.post('/api/share-course', async (req, res) => {
   const { email, courseTitle, role, courseLink, senderName } = req.body;
   

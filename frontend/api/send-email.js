@@ -1,6 +1,6 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // Activer les en-têtes CORS pour autoriser les appels du front et du back
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -62,4 +62,4 @@ module.exports = async function handler(req, res) {
     console.error('❌ Erreur d\'envoi Vercel Serverless:', error);
     return res.status(500).json({ error: 'Erreur lors de l\'envoi de l\'e-mail.', details: error.message });
   }
-};
+}
