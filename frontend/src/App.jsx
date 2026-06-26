@@ -209,6 +209,9 @@ function decodeCourse(base64Str) {
 }
 
 const getApiUrl = (path) => {
+  if (import.meta.env.VITE_API_URL) {
+    return `${import.meta.env.VITE_API_URL}${path}`;
+  }
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return `http://localhost:3000${path}`;
   }
