@@ -175,6 +175,47 @@ L'équipe IdeaGrid`,
       `
     };
 
+    // 1. Try sending via Vercel Serverless API first if FRONTEND_URL is configured
+    const frontendUrl = process.env.FRONTEND_URL;
+    if (frontendUrl) {
+      try {
+        const targetUrl = `${frontendUrl.replace(/\/$/, '')}/api/send-email`;
+        console.log(`Attempting to send email via Vercel API: ${targetUrl}`);
+        
+        // Dynamic fetch detection to support older Node versions if necessary
+        const fetchFn = typeof fetch !== 'undefined' ? fetch : globalThis.fetch;
+        if (!fetchFn) {
+          throw new Error('Fetch API is not available in this Node.js environment.');
+        }
+
+        const response = await fetchFn(targetUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            to: email,
+            subject: mailOptions.subject,
+            html: mailOptions.html,
+            text: mailOptions.text
+          })
+        });
+
+        if (response.ok) {
+          const resData = await response.json();
+          console.log('Email sent successfully via Vercel Serverless Function:', resData.messageId || 'success');
+          return res.json({ success: true });
+        } else {
+          const errText = await response.text();
+          console.warn(`Vercel API returned status ${response.status}: ${errText}`);
+          throw new Error(`Vercel API failed: ${errText}`);
+        }
+      } catch (vercelErr) {
+        console.warn('Vercel API sending failed, falling back to local SMTP transporter:', vercelErr.message);
+      }
+    }
+
+    // 2. Fallback to local SMTP transporter
     try {
       console.log(`Attempting to send email from ${smtpFrom} to ${email} via ${smtpHost}`);
       const transporter = nodemailer.createTransport({
