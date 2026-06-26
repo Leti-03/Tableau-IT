@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -141,44 +142,14 @@ app.post('/api/share-course', async (req, res) => {
   }
 
   try {
-    let transporter;
-    
     const smtpHost = process.env.SMTP_HOST;
     const smtpPort = process.env.SMTP_PORT || 587;
     const smtpUser = process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASS;
-
-    if (smtpHost && smtpUser && smtpPass) {
-      transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: parseInt(smtpPort),
-        secure: smtpPort == 465,
-        auth: {
-          user: smtpUser,
-          pass: smtpPass
-        }
-      });
-      console.log('Using custom SMTP configuration.');
-    } else {
-      try {
-        const testAccount = await nodemailer.createTestAccount();
-        transporter = nodemailer.createTransport({
-          host: 'smtp.ethereal.email',
-          port: 587,
-          secure: false,
-          auth: {
-            user: testAccount.user,
-            pass: testAccount.pass
-          }
-        });
-        console.log('Using fallback Ethereal SMTP configuration.');
-      } catch (err) {
-        console.warn('Could not create Ethereal account, using mock transmitter.', err);
-      }
-    }
+    const smtpFrom = process.env.SMTP_FROM || smtpUser || 'supportideagrid@gmail.com';
 
     const mailOptions = {
-      from: smtpUser ? `"IdeaGrid" <${smtpUser}>` : '"IdeaGrid Support" <support@ideagrid.com>',
+      from: `"IdeaGrid" <${smtpFrom}>`,
       to: email,
       subject: `${senderName || 'Quelqu\'un'} vous invite à collaborer sur "${courseTitle}"`,
       text: `Bonjour,
@@ -204,24 +175,137 @@ L'équipe IdeaGrid`,
       `
     };
 
-    if (transporter) {
+    try {
+      console.log(`Attempting to send email from ${smtpFrom} to ${email} via ${smtpHost}`);
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: parseInt(smtpPort),
+        secure: smtpPort == 465,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass
+        }
+      });
       const info = await transporter.sendMail(mailOptions);
-      console.log('Email sent successfully:', info.messageId);
+      console.log('Email sent successfully via SMTP:', info.messageId);
+      return res.json({ success: true });
+    } catch (smtpErr) {
+      console.warn('SMTP sending failed, falling back to Ethereal SMTP:', smtpErr.message);
+      
+      const testAccount = await nodemailer.createTestAccount();
+      const fallbackTransporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass
+        }
+      });
+
+      const fallbackMailOptions = {
+        ...mailOptions,
+        from: '"IdeaGrid Support" <support@ideagrid.com>'
+      };
+
+      const info = await fallbackTransporter.sendMail(fallbackMailOptions);
+      console.log('Email sent successfully via fallback Ethereal:', info.messageId);
       const previewUrl = nodemailer.getTestMessageUrl(info);
       if (previewUrl) {
         console.log('Preview URL:', previewUrl);
         return res.json({ success: true, previewUrl });
       }
       return res.json({ success: true });
-    } else {
-      console.log('Mocking email delivery to:', email);
-      return res.json({ success: true, mock: true });
     }
   } catch (err) {
-    console.error('Error sending email:', err);
-    res.status(500).json({ error: 'Failed to send email', details: err.message });
+    console.error('Error in share-course endpoint:', err);
+    res.status(500).json({ error: 'Failed to share course', details: err.message });
   }
 });
+
+// Route: Synchronize a profile and its courses from the owner
+app.post('/api/sync-profile', (req, res) => {
+  const { profileId, profile, courses } = req.body;
+  if (!profileId || !profile || !courses) {
+    return res.status(400).json({ error: 'profileId, profile, and courses are required' });
+  }
+
+  const filePath = path.join(DATA_DIR, `shared_profile_${profileId}.json`);
+  const profileData = {
+    profileId,
+    profile,
+    courses,
+    updatedAt: new Date().toISOString()
+  };
+
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(profileData, null, 2), 'utf8');
+    res.json({ success: true, message: 'Profile synced successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to sync profile', details: err.message });
+  }
+});
+
+// Route: Get shared profile courses
+app.get('/api/shared-profile/:profileId', (req, res) => {
+  const { profileId } = req.params;
+  const filePath = path.join(DATA_DIR, `shared_profile_${profileId}.json`);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'Shared profile not found' });
+  }
+
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    res.json(JSON.parse(content));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to read shared profile data', details: err.message });
+  }
+});
+
+// Route: Update shared profile courses (collaborator mode)
+app.post('/api/shared-profile/:profileId/update-courses', (req, res) => {
+  const { profileId } = req.params;
+  const { courses } = req.body;
+
+  if (!courses) {
+    return res.status(400).json({ error: 'courses array is required' });
+  }
+
+  const filePath = path.join(DATA_DIR, `shared_profile_${profileId}.json`);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'Shared profile not found' });
+  }
+
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const data = JSON.parse(content);
+    
+    // Update courses
+    data.courses = courses;
+    data.updatedAt = new Date().toISOString();
+
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+    res.json({ success: true, message: 'Shared profile courses updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update shared profile courses', details: err.message });
+  }
+});
+
+// Serve static files from the React frontend build (for production on Render)
+const frontendDistPath = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
+  console.log('Serving frontend static files from:', frontendDistPath);
+  
+  // Fallback for SPA routing (excluding API routes)
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
+  });
+} else {
+  console.log('Frontend build directory not found at:', frontendDistPath);
+}
 
 // Seed default course if empty (Photosynthèse)
 const seedDefaultCourse = () => {

@@ -208,6 +208,13 @@ function decodeCourse(base64Str) {
   }
 }
 
+const getApiUrl = (path) => {
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return `http://localhost:3000${path}`;
+  }
+  return path;
+};
+
 // ── Icons SVG ─────────────────────────────────────────────────────────────────
 const Icons = {
   Ecrire: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>,
@@ -460,8 +467,16 @@ function Whiteboard({
   onSave,
   onShare,
   activeProfile,
-  onUpdateSwotBullet
+  onUpdateSwotBullet,
+  // New props for collaboration
+  sharedAccess,
+  onRefresh,
+  onExitCollaboration,
+  onAddCommentCard
 }) {
+  const isReadOnly = sharedAccess && sharedAccess.permission === "Peut consulter";
+  const isCommentOnly = sharedAccess && sharedAccess.permission === "Peut commenter";
+  const isDisabled = isReadOnly || isCommentOnly;
   const [editingTitle, setEditingTitle] = useState(false);
   const [editingDesc, setEditingDesc] = useState(false);
   const [editingPtIndex, setEditingPtIndex] = useState(null);
@@ -799,54 +814,115 @@ function Whiteboard({
       >
         <div style={{
           width: "100%", maxWidth: 900, background: "white", borderRadius: 16, boxShadow: "0 4px 20px rgba(15,23,42,0.05)",
-          padding: "50px", minHeight: "850px", position: "relative", transform: `scale(${zoom / 100})`, transformOrigin: "top center", transition: "transform 0.15s ease"
+          padding: "50px", minHeight: "850px", position: "relative", transform: `scale(${zoom / 100})`, transformOrigin: "top center", transition: "transform 0.15s ease",
+          overflow: "hidden"
         }}>
           
-          {/* Top Right Header Circular Control Buttons (mic, save, share) */}
-          <div style={{ position: "absolute", top: 20, right: 20, display: "flex", gap: 10, zIndex: 100 }}>
-            <button 
-              onClick={toggleRecording} 
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36,
-                borderRadius: "50%", background: isRecording ? "#ef4444" : "#f1f5f9",
-                border: "none", cursor: "pointer", fontSize: 16, color: isRecording ? "white" : "#475569",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.05)", transition: "all 0.2s"
-              }}
-              title="Activer/Couper Micro"
-            >
-              🎙️
-            </button>
-            <button 
-              onClick={onSave} 
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36,
-                borderRadius: "50%", background: "#f1f5f9", border: "none", cursor: "pointer",
-                fontSize: 16, color: "#475569", boxShadow: "0 2px 4px rgba(0,0,0,0.05)", transition: "all 0.2s"
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = "#e2e8f0"}
-              onMouseLeave={(e) => e.currentTarget.style.background = "#f1f5f9"}
-              title="Enregistrer dans l'historique"
-            >
-              💾
-            </button>
-            <button 
-              onClick={onShare} 
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36,
-                borderRadius: "50%", background: "#f1f5f9", border: "none", cursor: "pointer",
-                fontSize: 16, color: "#475569", boxShadow: "0 2px 4px rgba(0,0,0,0.05)", transition: "all 0.2s"
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = "#e2e8f0"}
-              onMouseLeave={(e) => e.currentTarget.style.background = "#f1f5f9"}
-              title="Partager le cours"
-            >
-              📥
-            </button>
+          {/* Collaboration Mode Banner */}
+          {sharedAccess && (
+            <div style={{
+              margin: "-50px -50px 40px -50px",
+              padding: "14px 24px",
+              background: sharedAccess.permission === "Peut modifier" ? "#def7ec" : (sharedAccess.permission === "Peut commenter" ? "#fef9c3" : "#f1f5f9"),
+              borderBottom: sharedAccess.permission === "Peut modifier" ? "1px solid #bdecb6" : (sharedAccess.permission === "Peut commenter" ? "1px solid #fef08a" : "1px solid #cbd5e1"),
+              borderRadius: "16px 16px 0 0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontSize: 13,
+              color: sharedAccess.permission === "Peut modifier" ? "#03543f" : (sharedAccess.permission === "Peut commenter" ? "#713f12" : "#334155"),
+              fontWeight: 500
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: sharedAccess.permission === "Peut modifier" ? "#31c48d" : (sharedAccess.permission === "Peut commenter" ? "#eab308" : "#94a3b8"), animation: sharedAccess.permission === "Peut modifier" ? "pulse-anim 1s infinite" : "none" }}></span>
+                <span>
+                  {sharedAccess.permission === "Peut modifier" ? (
+                    <><strong>Mode Édition</strong> : Vous collaborez en temps réel sur le tableau de <strong>{sharedAccess.ownerName}</strong>.</>
+                  ) : sharedAccess.permission === "Peut commenter" ? (
+                    <><strong>Mode Commentaire</strong> : Vous pouvez ajouter des commentaires sur le tableau de <strong>{sharedAccess.ownerName}</strong>.</>
+                  ) : (
+                    <><strong>Mode Lecture seule</strong> : Vous visualisez le tableau de <strong>{sharedAccess.ownerName}</strong>.</>
+                  )}
+                </span>
+              </div>
+              <span style={{ fontSize: 11, opacity: 0.8 }}>Session partagée</span>
+            </div>
+          )}
+
+          {/* Top Right Header Circular Control Buttons (mic, save, share) or Collaboration controls */}
+          <div style={{ position: "absolute", top: sharedAccess ? 62 : 20, right: 20, display: "flex", gap: 10, zIndex: 100 }}>
+            {sharedAccess ? (
+              <>
+                <button 
+                  onClick={onRefresh} 
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6, padding: "0 14px", height: 36,
+                    borderRadius: 18, background: "#eff6ff", border: "1px solid #bfdbfe", cursor: "pointer",
+                    fontSize: 12, color: "#1e40af", fontWeight: 600, boxShadow: "0 2px 4px rgba(0,0,0,0.05)", transition: "all 0.2s"
+                  }}
+                  title="Actualiser le tableau"
+                >
+                  🔄 Actualiser
+                </button>
+                <button 
+                  onClick={onExitCollaboration} 
+                  style={{
+                    display: "flex", alignItems: "center", gap: 6, padding: "0 14px", height: 36,
+                    borderRadius: 18, background: "#fef2f2", border: "1px solid #fecaca", cursor: "pointer",
+                    fontSize: 12, color: "#991b1b", fontWeight: 600, boxShadow: "0 2px 4px rgba(0,0,0,0.05)", transition: "all 0.2s"
+                  }}
+                  title="Quitter la collaboration"
+                >
+                  ✕ Quitter
+                </button>
+              </>
+            ) : (
+              <>
+                <button 
+                  onClick={toggleRecording} 
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36,
+                    borderRadius: "50%", background: isRecording ? "#ef4444" : "#f1f5f9",
+                    border: "none", cursor: "pointer", fontSize: 16, color: isRecording ? "white" : "#475569",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.05)", transition: "all 0.2s"
+                  }}
+                  title="Activer/Couper Micro"
+                >
+                  🎙️
+                </button>
+                <button 
+                  onClick={onSave} 
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36,
+                    borderRadius: "50%", background: "#f1f5f9", border: "none", cursor: "pointer",
+                    fontSize: 16, color: "#475569", boxShadow: "0 2px 4px rgba(0,0,0,0.05)", transition: "all 0.2s"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "#e2e8f0"}
+                  onMouseLeave={(e) => e.currentTarget.style.background = "#f1f5f9"}
+                  title="Enregistrer dans l'historique"
+                >
+                  💾
+                </button>
+                <button 
+                  onClick={onShare} 
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36,
+                    borderRadius: "50%", background: "#f1f5f9", border: "none", cursor: "pointer",
+                    fontSize: 16, color: "#475569", boxShadow: "0 2px 4px rgba(0,0,0,0.05)", transition: "all 0.2s"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "#e2e8f0"}
+                  onMouseLeave={(e) => e.currentTarget.style.background = "#f1f5f9"}
+                  title="Partager le cours"
+                >
+                  📥
+                </button>
+              </>
+            )}
           </div>
 
           {/* Main Title */}
-          <div style={{ textAlign: "center", marginBottom: 40 }}>
-            {editingTitle ? (
+          <div style={{ textAlign: "center", marginBottom: 40, marginTop: sharedAccess ? 20 : 0 }}>
+            {editingTitle && !isDisabled ? (
               <input
                 value={course.title}
                 onChange={(e) => onUpdateTitle(e.target.value)}
@@ -861,12 +937,12 @@ function Whiteboard({
               />
             ) : (
               <h1 
-                onClick={() => setEditingTitle(true)}
-                title="Cliquez pour renommer"
+                onClick={() => !isDisabled && setEditingTitle(true)}
+                title={isDisabled ? "Lecture seule" : "Cliquez pour renommer"}
                 style={{ 
                   color: "#15803d", fontFamily: "cursive, sans-serif", fontSize: 32, 
                   fontWeight: "normal", margin: 0, display: "inline-block", 
-                  borderBottom: "2px solid #15803d", paddingBottom: 6, cursor: "pointer" 
+                  borderBottom: "2px solid #15803d", paddingBottom: 6, cursor: isDisabled ? "default" : "pointer" 
                 }}
               >
                 {course.title}
@@ -880,7 +956,7 @@ function Whiteboard({
             <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
               {/* Description */}
               <div style={{ position: "relative" }}>
-                {editingDesc ? (
+                {editingDesc && !isDisabled ? (
                   <textarea
                     value={tempDesc}
                     onChange={(e) => setTempDesc(e.target.value)}
@@ -900,17 +976,18 @@ function Whiteboard({
                 ) : (
                   <p 
                     onClick={() => {
+                      if (isDisabled) return;
                       setEditingDesc(true);
                       setTempDesc(course.description === "Commencer à écrire ou parlez au micro..." ? "" : course.description);
                     }}
-                    title="Cliquez pour éditer la description"
+                    title={isDisabled ? "Lecture seule" : "Cliquez pour éditer la description"}
                     style={{ 
                       color: course.descColor || selectedColor || "#1e293b", 
                       fontFamily: "cursive, sans-serif", 
                       fontSize: 16, 
                       lineHeight: 1.6, 
                       margin: 0, 
-                      cursor: "pointer" 
+                      cursor: isDisabled ? "default" : "pointer" 
                     }}
                   >
                     {displayDescription()}
@@ -932,7 +1009,7 @@ function Whiteboard({
                   {course.pointsCles.map((pt, idx) => (
                     <li key={idx} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span>•</span>
-                      {editingPtIndex === idx ? (
+                      {editingPtIndex === idx && !isDisabled ? (
                         <input
                           value={pt}
                           onChange={(e) => onUpdatePoint(idx, e.target.value)}
@@ -943,15 +1020,15 @@ function Whiteboard({
                         />
                       ) : (
                         <span 
-                          onClick={() => setEditingPtIndex(idx)}
-                          style={{ cursor: "pointer", flex: 1 }}
-                          title="Modifier"
+                          onClick={() => !isDisabled && setEditingPtIndex(idx)}
+                          style={{ cursor: isDisabled ? "default" : "pointer", flex: 1 }}
+                          title={isDisabled ? "Lecture seule" : "Modifier"}
                         >
                           {pt}
                         </span>
                       )}
                       
-                      {activeTab === "effacer" ? (
+                      {activeTab === "effacer" && !isDisabled ? (
                         <button 
                           onClick={() => onDeletePoint(idx)}
                           style={{ background: "none", border: "none", color: "#ef4444", fontSize: 14, cursor: "pointer", padding: "0 4px" }}
@@ -960,27 +1037,31 @@ function Whiteboard({
                           ✕
                         </button>
                       ) : (
-                        <span 
-                          onClick={() => setEditingPtIndex(idx)}
-                          style={{ fontSize: 11, color: "#94a3b8", cursor: "pointer", opacity: 0 }}
-                          className="edit-hint"
-                        >
-                          ✏️
-                        </span>
+                        !isDisabled && (
+                          <span 
+                            onClick={() => setEditingPtIndex(idx)}
+                            style={{ fontSize: 11, color: "#94a3b8", cursor: "pointer", opacity: 0 }}
+                            className="edit-hint"
+                          >
+                            ✏️
+                          </span>
+                        )
                       )}
                     </li>
                   ))}
                 </ul>
-                <button 
-                  onClick={onAddPoint}
-                  style={{
-                    marginTop: 12, background: "none", border: "1px dashed #3b82f6", color: "#3b82f6",
-                    borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontWeight: 500,
-                    transition: "all 0.2s"
-                  }}
-                >
-                  + Ajouter un point clé
-                </button>
+                {!isDisabled && (
+                  <button 
+                    onClick={onAddPoint}
+                    style={{
+                      marginTop: 12, background: "none", border: "1px dashed #3b82f6", color: "#3b82f6",
+                      borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontWeight: 500,
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    + Ajouter un point clé
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -990,12 +1071,21 @@ function Whiteboard({
             const isDragging = draggingCard?.id === card.id;
             const isNote = card.type === "notes_cours" || card.type === "speech_note";
             const isQuestion = card.type === "question";
+            const isComment = card.type === "comment";
             
-            const cardBg = isQuestion ? "#f5f3ff" : (card.type === "speech_note" ? (card.color || "#fef08a") : "#f8fafc");
-            const cardBorder = isQuestion ? "1px solid #ddd6fe" : "1px solid #e2e8f0";
-            const titleColor = card.color || (isQuestion ? "#7c3aed" : (card.type === "speech_note" ? "#854d0e" : "#2563eb"));
-            const textColor = isQuestion ? "#5b21b6" : (card.type === "speech_note" ? "#713f12" : "#334155");
-            const borderDash = isNote ? "1px dashed #e2e8f0" : "1px dashed #ddd6fe";
+            const cardBg = isQuestion ? "#f5f3ff" : (isComment ? "#fef9c3" : (card.type === "speech_note" ? (card.color || "#fef08a") : "#f8fafc"));
+            const cardBorder = isQuestion ? "1px solid #ddd6fe" : (isComment ? "1px solid #fef08a" : "1px solid #e2e8f0");
+            const titleColor = card.color || (isQuestion ? "#7c3aed" : (isComment ? "#a16207" : (card.type === "speech_note" ? "#854d0e" : "#2563eb")));
+            const textColor = isQuestion ? "#5b21b6" : (isComment ? "#713f12" : (card.type === "speech_note" ? "#713f12" : "#334155"));
+            const borderDash = (isNote || isComment) ? "1px dashed #cbd5e1" : "1px dashed #ddd6fe";
+
+            const canDeleteCard = !sharedAccess || 
+                                  sharedAccess.permission === "Peut modifier" || 
+                                  (sharedAccess.permission === "Peut commenter" && card.createdBy === (activeProfile?.email || "guest@ideagrid.com"));
+
+            const canEditCard = !sharedAccess || 
+                                sharedAccess.permission === "Peut modifier" || 
+                                (sharedAccess.permission === "Peut commenter" && card.createdBy === (activeProfile?.email || "guest@ideagrid.com"));
 
             return (
               <div
@@ -1006,7 +1096,7 @@ function Whiteboard({
                   left: card.x,
                   top: card.y,
                   width: 250,
-                  cursor: activeTab === "selectionner" ? "move" : "default",
+                  cursor: activeTab === "selectionner" && canEditCard ? "move" : "default",
                   background: cardBg,
                   border: cardBorder,
                   borderRadius: 12,
@@ -1020,7 +1110,7 @@ function Whiteboard({
                   transition: isDragging ? "none" : "box-shadow 0.15s, transform 0.15s"
                 }}
               >
-                {(isQuestion || isNote || card.isPinned) && renderPin(card.color)}
+                {(isQuestion || isNote || isComment || card.isPinned) && renderPin(card.color)}
                 
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, borderBottom: borderDash, paddingBottom: 6 }}>
                   <span style={{ 
@@ -1032,16 +1122,18 @@ function Whiteboard({
                     {card.title}
                   </span>
                   
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); onDeleteCard(card.id); }}
-                    style={{ border: "none", background: "none", cursor: "pointer", color: "#94a3b8", fontSize: 14 }}
-                  >
-                    ✕
-                  </button>
+                  {canDeleteCard && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onDeleteCard(card.id); }}
+                      style={{ border: "none", background: "none", cursor: "pointer", color: "#94a3b8", fontSize: 14 }}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
 
                 <div>
-                  {editingCardId === card.id ? (
+                  {editingCardId === card.id && canEditCard ? (
                     <textarea
                       value={card.content}
                       onChange={(e) => onUpdateCardContent(card.id, e.target.value)}
@@ -1056,6 +1148,7 @@ function Whiteboard({
                   ) : (
                     <p 
                       onClick={() => {
+                        if (!canEditCard) return;
                         if (activeTab === "effacer") {
                           onDeleteCard(card.id);
                         } else {
@@ -1067,10 +1160,10 @@ function Whiteboard({
                         color: textColor,
                         fontFamily: "cursive, sans-serif",
                         whiteSpace: "pre-wrap",
-                        cursor: "pointer",
+                        cursor: canEditCard ? "pointer" : "default",
                         lineHeight: 1.5
                       }}
-                      title={activeTab === "effacer" ? "Cliquer pour effacer" : "Cliquer pour modifier"}
+                      title={!canEditCard ? "Lecture seule" : (activeTab === "effacer" ? "Cliquer pour effacer" : "Cliquer pour modifier")}
                     >
                       {card.content || "Cliquez pour écrire..."}
                     </p>
@@ -1219,20 +1312,34 @@ function Whiteboard({
           🖐️ Pan
         </button>
 
-        {activeTab === "ecrire" && (
+        {activeTab === "ecrire" && !isReadOnly && (
           <>
             <div style={{ width: 1, height: 20, background: "#cbd5e1" }}></div>
-            <button 
-              onClick={() => setShowToolbar(!showToolbar)}
-              style={{ 
-                border: "1px solid #2563eb", borderRadius: 8, padding: "6px 14px", cursor: "pointer", 
-                fontSize: 13, background: showToolbar ? "#2563eb" : "white", 
-                color: showToolbar ? "white" : "#2563eb", fontWeight: 600,
-                transition: "all 0.15s"
-              }}
-            >
-              🎨 Outils
-            </button>
+            {isCommentOnly ? (
+              <button 
+                onClick={onAddCommentCard}
+                style={{ 
+                  border: "1px solid #ca8a04", borderRadius: 8, padding: "6px 14px", cursor: "pointer", 
+                  fontSize: 13, background: "#fef9c3", 
+                  color: "#854d0e", fontWeight: 600,
+                  transition: "all 0.15s"
+                }}
+              >
+                💬 Ajouter un commentaire
+              </button>
+            ) : (
+              <button 
+                onClick={() => setShowToolbar(!showToolbar)}
+                style={{ 
+                  border: "1px solid #2563eb", borderRadius: 8, padding: "6px 14px", cursor: "pointer", 
+                  fontSize: 13, background: showToolbar ? "#2563eb" : "white", 
+                  color: showToolbar ? "white" : "#2563eb", fontWeight: 600,
+                  transition: "all 0.15s"
+                }}
+              >
+                🎨 Outils
+              </button>
+            )}
           </>
         )}
       </div>
@@ -1342,6 +1449,126 @@ function ShareModal({ course, onClose }) {
             }}
           >
             Fermer
+          </button>
+        </div>
+      </div>
+    </ModalBackdrop>
+  );
+}
+
+// ── Export Modal ──────────────────────────────────────────────────────────────
+function ExportModal({ isOpen, onClose, courses, activeCourseId, selectedFormatDefault, onExport }) {
+  const [selectedCourseId, setSelectedCourseId] = useState(activeCourseId);
+  const [selectedFormat, setSelectedFormat] = useState(selectedFormatDefault || "pdf");
+
+  if (!isOpen) return null;
+
+  const handleExportClick = () => {
+    const course = courses.find(c => c.id === selectedCourseId);
+    if (course) {
+      onClose();
+      setTimeout(() => {
+        onExport(course, selectedFormat);
+      }, 150);
+    }
+  };
+
+  const formats = [
+    { id: "pdf", title: "Exporter en PDF", desc: "Idéal pour l'impression ou le partage", icon: "📄", bg: "#fef2f2", color: "#ef4444" },
+    { id: "png", title: "Exporter en image (PNG)", desc: "Image de haute qualité", icon: "🖼️", bg: "#ecfdf5", color: "#10b981" },
+    { id: "svg", title: "Exporter en SVG", desc: "Idéal pour une utilisation dans des présentations", icon: "📐", bg: "#eff6ff", color: "#3b82f6" },
+    { id: "json", title: "Exporter en fichier IdeaGrid", desc: "Conserve toutes les fonctionnalités", icon: "💾", bg: "#faf5ff", color: "#a855f7" }
+  ];
+
+  return (
+    <ModalBackdrop onClose={onClose}>
+      <div style={{
+        background: "white", width: 520, maxWidth: "95%", borderRadius: 20,
+        padding: 28, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+        fontFamily: "'Inter', sans-serif"
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <div>
+            <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#0f172a" }}>Exporter</h3>
+            <p style={{ margin: "4px 0 0 0", fontSize: 13, color: "#64748b" }}>Téléchargez votre tableau dans différents formats.</p>
+          </div>
+          <button onClick={onClose} style={{ border: "none", background: "none", fontSize: 20, cursor: "pointer", color: "#94a3b8", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "#475569"} onMouseLeave={(e) => e.currentTarget.style.color = "#94a3b8"}>✕</button>
+        </div>
+
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#334155", marginBottom: 8 }}>Sélectionner le cours à exporter</label>
+          <select 
+            value={selectedCourseId}
+            onChange={(e) => setSelectedCourseId(e.target.value)}
+            style={{
+              width: "100%", padding: "12px 14px", borderRadius: 10, border: "1px solid #cbd5e1",
+              background: "#f8fafc", fontSize: 14, color: "#0f172a", outline: "none", cursor: "pointer"
+            }}
+          >
+            {courses.map(c => (
+              <option key={c.id} value={c.id}>{c.title}</option>
+            ))}
+          </select>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+          <label style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>Format d'exportation</label>
+          {formats.map(f => {
+            const isSelected = selectedFormat === f.id;
+            return (
+              <div 
+                key={f.id}
+                onClick={() => setSelectedFormat(f.id)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 16, padding: "14px 18px",
+                  borderRadius: 12, border: isSelected ? `2px solid ${f.color}` : "1px solid #e2e8f0",
+                  background: isSelected ? `${f.bg}40` : "white", cursor: "pointer",
+                  transition: "all 0.2s"
+                }}
+              >
+                <div style={{
+                  width: 40, height: 40, borderRadius: 8, background: f.bg,
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20
+                }}>
+                  {f.icon}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#0f172a" }}>{f.title}</div>
+                  <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{f.desc}</div>
+                </div>
+                <div style={{
+                  width: 20, height: 20, borderRadius: "50%", border: isSelected ? `6px solid ${f.color}` : "2px solid #cbd5e1",
+                  boxSizing: "border-box", transition: "all 0.15s"
+                }} />
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+          <button 
+            onClick={onClose}
+            style={{
+              padding: "10px 20px", border: "1px solid #cbd5e1", borderRadius: 10,
+              background: "white", color: "#334155", fontSize: 14, fontWeight: 500, cursor: "pointer",
+              transition: "background 0.2s"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "#f8fafc"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "white"}
+          >
+            Annuler
+          </button>
+          <button 
+            onClick={handleExportClick}
+            style={{
+              padding: "10px 24px", border: "none", borderRadius: 10,
+              background: "#2563eb", color: "white", fontSize: 14, fontWeight: 600, cursor: "pointer",
+              boxShadow: "0 4px 6px -1px rgba(37, 99, 235, 0.2)", transition: "background 0.2s"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "#1d4ed8"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "#2563eb"}
+          >
+            Exporter
           </button>
         </div>
       </div>
@@ -1725,9 +1952,12 @@ function HistoryView({ courses, activeId, onLoad, onDelete, onRename }) {
 }
 
 // ── Share View Component ────────────────────────────────────────────────────────
-function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
+function ShareView({ activeProfile, courses, activeCourse, setToastMessage, setCurrentCourseId }) {
   const [inviteInput, setInviteInput] = useState("");
   const [inviteRole, setInviteRole] = useState("Peut modifier");
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [defaultExportFormat, setDefaultExportFormat] = useState("pdf");
+  
   const [collaborators, setCollaborators] = useState(() => {
     const key = `ideagrid_collaborators_${activeProfile?.id || "guest"}`;
     const saved = localStorage.getItem(key);
@@ -1765,9 +1995,30 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
     localStorage.setItem(key, JSON.stringify(updated));
     setInviteInput("");
 
+    // 1. Sync profile and courses to the backend first
     try {
-      const courseLink = `${window.location.origin}/#course=${encodeCourse(activeCourse)}`;
-      const response = await fetch('/api/share-course', {
+      await fetch(getApiUrl('/api/sync-profile'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          profileId: activeProfile?.id || "guest",
+          profile: activeProfile || { id: "guest", firstName: "Invité", lastName: "IdeaGrid", email: "guest@ideagrid.com", color: "#3b82f6" },
+          courses: courses
+        })
+      });
+    } catch (err) {
+      console.error("Failed to sync profile to backend before sharing", err);
+    }
+
+    // 2. Send invitation email
+    try {
+      const ownerId = activeProfile?.id || "guest";
+      const ownerName = activeProfile ? `${activeProfile.firstName} ${activeProfile.lastName}` : "Invité";
+      const courseLink = `${window.location.origin}/#shared-profile?ownerId=${ownerId}&permission=${encodeURIComponent(inviteRole)}&ownerName=${encodeURIComponent(ownerName)}`;
+      
+      const response = await fetch(getApiUrl('/api/share-course'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1777,7 +2028,7 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
           courseTitle: activeCourse.title,
           role: inviteRole,
           courseLink,
-          senderName: activeProfile ? `${activeProfile.firstName} ${activeProfile.lastName}` : "Invité"
+          senderName: ownerName
         })
       });
       const result = await response.json();
@@ -1811,7 +2062,9 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
   };
 
   const handleCopyLink = () => {
-    const shareLink = `${window.location.origin}/#course=${encodeCourse(activeCourse)}`;
+    const ownerId = activeProfile?.id || "guest";
+    const ownerName = activeProfile ? `${activeProfile.firstName} ${activeProfile.lastName}` : "Invité";
+    const shareLink = `${window.location.origin}/#shared-profile?ownerId=${ownerId}&permission=${encodeURIComponent("Peut consulter")}&ownerName=${encodeURIComponent(ownerName)}`;
     navigator.clipboard.writeText(shareLink).then(() => {
       setToastMessage("Lien de partage copié dans le presse-papiers !");
       setTimeout(() => setToastMessage(""), 3000);
@@ -1820,23 +2073,31 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
     });
   };
 
-  const handleExportPDF = () => {
-    window.print();
+  const handleExportPDF = (course = activeCourse) => {
+    const originalTab = activeTab;
+    setCurrentCourseId(course.id);
+    setActiveTab("ecrire");
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => {
+        setActiveTab(originalTab);
+      }, 100);
+    }, 450);
   };
 
-  const handleExportJSON = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(activeCourse, null, 2));
+  const handleExportJSON = (course = activeCourse) => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(course, null, 2));
     const dlAnchorElem = document.createElement('a');
     dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", `${activeCourse.title.toLowerCase().replace(/\s+/g, "_")}_ideagrid.json`);
+    dlAnchorElem.setAttribute("download", `${course.title.toLowerCase().replace(/\s+/g, "_")}_ideagrid.json`);
     dlAnchorElem.click();
     setToastMessage("Fichier IdeaGrid JSON téléchargé !");
     setTimeout(() => setToastMessage(""), 3000);
   };
 
-  const handleExportSVG = () => {
+  const handleExportSVG = (course = activeCourse) => {
     let cardG = '';
-    (activeCourse.cards || []).forEach((c) => {
+    (course.cards || []).forEach((c) => {
       cardG += `
       <g transform="translate(${c.x || 100}, ${c.y || 100})">
         <rect width="220" height="130" rx="8" fill="${c.color || '#eff6ff'}" stroke="#cbd5e1" stroke-width="1.5" />
@@ -1851,15 +2112,15 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
       <rect width="1200" height="80" fill="#0f172a" />
       <text x="40" y="48" font-family="sans-serif" font-size="20" font-weight="bold" fill="#ffffff">IdeaGrid Smart Whiteboard</text>
       
-      <text x="60" y="150" font-family="sans-serif" font-size="32" font-weight="bold" fill="#1e293b">${activeCourse.title}</text>
+      <text x="60" y="150" font-family="sans-serif" font-size="32" font-weight="bold" fill="#1e293b">${course.title}</text>
       <text x="60" y="210" font-family="sans-serif" font-size="16" fill="#2563eb" font-weight="bold">Description du cours :</text>
-      <text x="60" y="240" font-family="cursive, sans-serif" font-size="18" fill="#334155">${activeCourse.description || ''}</text>
+      <text x="60" y="240" font-family="cursive, sans-serif" font-size="18" fill="#334155">${course.description || ''}</text>
       
       <text x="650" y="150" font-family="sans-serif" font-size="22" font-weight="bold" fill="#2563eb">Points clés</text>
-      ${(activeCourse.pointsCles || []).map((pt, idx) => `<text x="650" y="${190 + idx * 30}" font-family="sans-serif" font-size="14" fill="#475569">• ${pt}</text>`).join('')}
+      ${(course.pointsCles || []).map((pt, idx) => `<text x="650" y="${190 + idx * 30}" font-family="sans-serif" font-size="14" fill="#475569">• ${pt}</text>`).join('')}
       
-      <text x="650" y="${190 + (activeCourse.pointsCles || []).length * 30 + 30}" font-family="sans-serif" font-size="22" font-weight="bold" fill="#9333ea">Question Clé</text>
-      <text x="650" y="${190 + (activeCourse.pointsCles || []).length * 30 + 60}" font-family="sans-serif" font-size="14" fill="#475569">${activeCourse.question || ''}</text>
+      <text x="650" y="${190 + (course.pointsCles || []).length * 30 + 30}" font-family="sans-serif" font-size="22" font-weight="bold" fill="#9333ea">Question Clé</text>
+      <text x="650" y="${190 + (course.pointsCles || []).length * 30 + 60}" font-family="sans-serif" font-size="14" fill="#475569">${course.question || ''}</text>
       
       ${cardG}
     </svg>`;
@@ -1868,7 +2129,7 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
     const svgUrl = URL.createObjectURL(svgBlob);
     const downloadLink = document.createElement('a');
     downloadLink.href = svgUrl;
-    downloadLink.download = `${activeCourse.title.toLowerCase().replace(/\s+/g, "_")}.svg`;
+    downloadLink.download = `${course.title.toLowerCase().replace(/\s+/g, "_")}.svg`;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
@@ -1877,7 +2138,7 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
     setTimeout(() => setToastMessage(""), 3000);
   };
 
-  const handleExportPNG = () => {
+  const handleExportPNG = (course = activeCourse) => {
     const canvas = document.createElement('canvas');
     canvas.width = 1200;
     canvas.height = 1000;
@@ -1895,7 +2156,7 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
     
     ctx.fillStyle = '#1e293b';
     ctx.font = 'bold 32px sans-serif';
-    ctx.fillText(activeCourse.title, 60, 150);
+    ctx.fillText(course.title, 60, 150);
     
     ctx.fillStyle = '#2563eb';
     ctx.font = '16px sans-serif';
@@ -1904,7 +2165,7 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
     ctx.fillStyle = '#334155';
     ctx.font = 'italic 18px cursive, sans-serif';
     
-    const descText = activeCourse.description || "Aucune description...";
+    const descText = course.description || "Aucune description...";
     const words = descText.split(' ');
     let line = '';
     let y = 245;
@@ -1932,7 +2193,7 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
     ctx.fillStyle = '#475569';
     ctx.font = '16px sans-serif';
     let py = 195;
-    (activeCourse.pointsCles || []).forEach((pt) => {
+    (course.pointsCles || []).forEach((pt) => {
       ctx.fillText(`•  ${pt}`, 650, py);
       py += 32;
     });
@@ -1943,9 +2204,9 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
     
     ctx.fillStyle = '#475569';
     ctx.font = '16px sans-serif';
-    ctx.fillText(activeCourse.question || 'Pourquoi ?', 650, py + 55);
+    ctx.fillText(course.question || 'Pourquoi ?', 650, py + 55);
     
-    (activeCourse.cards || []).forEach(card => {
+    (course.cards || []).forEach(card => {
       const cx = card.x || 100;
       const cy = card.y || 100;
       
@@ -1996,7 +2257,7 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
     
     const dataURL = canvas.toDataURL('image/png');
     const link = document.createElement('a');
-    link.download = `${activeCourse.title.toLowerCase().replace(/\s+/g, '_')}.png`;
+    link.download = `${course.title.toLowerCase().replace(/\s+/g, '_')}.png`;
     link.href = dataURL;
     document.body.appendChild(link);
     link.click();
@@ -2168,7 +2429,7 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 
                 <button 
-                  onClick={handleExportPDF}
+                  onClick={() => { setDefaultExportFormat("pdf"); setShowExportModal(true); }}
                   style={{
                     display: "flex", gap: 12, alignItems: "center", padding: 12, border: "1px solid #e2e8f0",
                     borderRadius: 8, background: "white", width: "100%", cursor: "pointer", textAlign: "left", transition: "all 0.15s"
@@ -2184,7 +2445,7 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
                 </button>
 
                 <button 
-                  onClick={handleExportPNG}
+                  onClick={() => { setDefaultExportFormat("png"); setShowExportModal(true); }}
                   style={{
                     display: "flex", gap: 12, alignItems: "center", padding: 12, border: "1px solid #e2e8f0",
                     borderRadius: 8, background: "white", width: "100%", cursor: "pointer", textAlign: "left", transition: "all 0.15s"
@@ -2200,7 +2461,7 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
                 </button>
 
                 <button 
-                  onClick={handleExportSVG}
+                  onClick={() => { setDefaultExportFormat("svg"); setShowExportModal(true); }}
                   style={{
                     display: "flex", gap: 12, alignItems: "center", padding: 12, border: "1px solid #e2e8f0",
                     borderRadius: 8, background: "white", width: "100%", cursor: "pointer", textAlign: "left", transition: "all 0.15s"
@@ -2216,7 +2477,7 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
                 </button>
 
                 <button 
-                  onClick={handleExportJSON}
+                  onClick={() => { setDefaultExportFormat("json"); setShowExportModal(true); }}
                   style={{
                     display: "flex", gap: 12, alignItems: "center", padding: 12, border: "1px solid #e2e8f0",
                     borderRadius: 8, background: "white", width: "100%", cursor: "pointer", textAlign: "left", transition: "all 0.15s"
@@ -2292,6 +2553,22 @@ function ShareView({ activeProfile, courses, activeCourse, setToastMessage }) {
           </div>
         </div>
       </div>
+
+      {showExportModal && (
+        <ExportModal 
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          courses={courses}
+          activeCourseId={activeCourse.id}
+          selectedFormatDefault={defaultExportFormat}
+          onExport={(selectedCourse, format) => {
+            if (format === 'pdf') handleExportPDF(selectedCourse);
+            else if (format === 'png') handleExportPNG(selectedCourse);
+            else if (format === 'svg') handleExportSVG(selectedCourse);
+            else if (format === 'json') handleExportJSON(selectedCourse);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -2611,7 +2888,7 @@ export default function App() {
     }
   }, [activeProfileId]);
 
-  // Save courses list changes to localStorage (isolated by profile ID)
+  // Save courses list changes to localStorage or sync to backend if collaborating
   const updateCurrentCourse = (callback) => {
     setCourses(prev => {
       const updated = prev.map(c => {
@@ -2621,7 +2898,18 @@ export default function App() {
         }
         return c;
       });
-      saveCours(activeProfileId, updated);
+      
+      if (sharedAccess) {
+        if (sharedAccess.permission === "Peut modifier" || sharedAccess.permission === "Peut commenter") {
+          fetch(getApiUrl(`/api/shared-profile/${sharedAccess.ownerId}/update-courses`), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ courses: updated })
+          }).catch(err => console.error("Failed to sync updates to backend", err));
+        }
+      } else {
+        saveCours(activeProfileId, updated);
+      }
       return updated;
     });
   };
@@ -2657,32 +2945,120 @@ export default function App() {
     });
   };
 
-  // Decode shared link on mount
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith("#course=")) {
-      const base64Data = hash.substring("#course=".length);
-      const decoded = decodeCourse(base64Data);
-      if (decoded) {
-        const importedCourse = {
-          ...decoded,
-          id: "imported-" + genId(),
-          title: decoded.title + " (Partagé)"
-        };
-        
-        setCourses(prev => {
-          const exists = prev.some(c => c.title === importedCourse.title && c.description === importedCourse.description);
-          if (exists) return prev;
-          const newList = [importedCourse, ...prev];
-          saveCours(activeProfileId, newList);
-          return newList;
-        });
-        setCurrentCourseId(importedCourse.id);
-        setActiveTab("ecrire"); // Open editor immediately
-        alert(`Cours partagé "${decoded.title}" importé avec succès !`);
-        window.location.hash = "";
-      }
+  // Decode shared link or load shared profile on mount and hashchange
+  const [sharedAccess, setSharedAccess] = useState(null);
+
+  const handleExitCollaboration = () => {
+    setSharedAccess(null);
+    const list = getCours(activeProfileId);
+    setCourses(list);
+    if (list.length > 0) {
+      setCurrentCourseId(list[0].id);
     }
+    setActiveTab("accueil");
+  };
+
+  const handleRefreshSharedProfile = () => {
+    const profileId = sharedAccess ? sharedAccess.ownerId : activeProfileId;
+    fetch(getApiUrl(`/api/shared-profile/${profileId}`))
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.courses) {
+          setCourses(data.courses);
+          if (sharedAccess) {
+            const exists = data.courses.some(c => c.id === currentCourseId);
+            if (!exists && data.courses.length > 0) {
+              setCurrentCourseId(data.courses[0].id);
+            }
+          } else {
+            saveCours(activeProfileId, data.courses);
+          }
+          setToastMessage("Espace de travail synchronisé !");
+          setTimeout(() => setToastMessage(""), 3000);
+        }
+      })
+      .catch(err => console.error("Failed to sync shared profile", err));
+  };
+
+  const handleAddCommentCard = () => {
+    const userEmail = activeProfile?.email || "guest@ideagrid.com";
+    const userName = activeProfile ? `${activeProfile.firstName} ${activeProfile.lastName}` : "Collaborateur";
+    const newCard = {
+      id: genId(),
+      type: "comment",
+      title: `Commentaire de ${userName}`,
+      content: "Écrire un commentaire...",
+      x: 150 + Math.random() * 100,
+      y: 180 + Math.random() * 100,
+      isPinned: true,
+      color: "#fef08a",
+      createdBy: userEmail,
+      timestamp: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+    };
+    updateCurrentCourse(prev => ({
+      ...prev,
+      cards: [...prev.cards, newCard]
+    }));
+  };
+
+  useEffect(() => {
+    const checkHash = () => {
+      const hash = window.location.hash;
+      if (hash && hash.startsWith("#shared-profile")) {
+        const paramStr = hash.substring("#shared-profile?".length);
+        const params = new URLSearchParams(paramStr);
+        const ownerId = params.get("ownerId");
+        const permission = params.get("permission");
+        const ownerName = params.get("ownerName");
+
+        if (ownerId && permission && ownerName) {
+          fetch(getApiUrl(`/api/shared-profile/${ownerId}`))
+            .then(res => res.json())
+            .then(data => {
+              if (data && data.courses) {
+                setCourses(data.courses);
+                setSharedAccess({ ownerId, permission, ownerName });
+                if (data.courses.length > 0) {
+                  setCurrentCourseId(data.courses[0].id);
+                }
+                setActiveTab("ecrire");
+                alert(`Vous collaborez avec ${ownerName} en mode "${permission}".`);
+              }
+            })
+            .catch(err => {
+              console.error("Failed to load shared profile", err);
+              alert("Impossible de charger l'espace partagé.");
+            });
+        }
+        window.location.hash = "";
+      } else if (hash && hash.startsWith("#course=")) {
+        const base64Data = hash.substring("#course=".length);
+        const decoded = decodeCourse(base64Data);
+        if (decoded) {
+          const importedCourse = {
+            ...decoded,
+            id: "imported-" + genId(),
+            title: decoded.title + " (Partagé)"
+          };
+          
+          setCourses(prev => {
+            const exists = prev.some(c => c.title === importedCourse.title && c.description === importedCourse.description);
+            if (exists) return prev;
+            const newList = [importedCourse, ...prev];
+            saveCours(activeProfileId, newList);
+            return newList;
+          });
+          setCurrentCourseId(importedCourse.id);
+          setActiveTab("ecrire");
+          alert(`Cours partagé "${decoded.title}" importé avec succès !`);
+          window.location.hash = "";
+        }
+      }
+    };
+
+    checkHash();
+    window.addEventListener("hashchange", checkHash);
+    return () => window.removeEventListener("hashchange", checkHash);
   }, [activeProfileId]);
 
   // Web Speech API Voice recognition hook with ref closure fixes
@@ -2857,6 +3233,10 @@ export default function App() {
   // Card dragging mouse/pointer event listeners
   const handlePointerDown = (e, card) => {
     if (activeTab !== "selectionner") return;
+    if (sharedAccess) {
+      if (sharedAccess.permission === "Peut consulter") return;
+      if (sharedAccess.permission === "Peut commenter" && card.createdBy !== (activeProfile?.email || "guest@ideagrid.com")) return;
+    }
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
     setDraggingCard({
@@ -2981,6 +3361,7 @@ export default function App() {
 
   return (
     <div 
+      className="app-container"
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
@@ -3024,6 +3405,7 @@ export default function App() {
           courses={courses}
           activeCourse={activeCourse}
           setToastMessage={setToastMessage}
+          setCurrentCourseId={setCurrentCourseId}
         />
       ) : (
         <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
@@ -3081,20 +3463,41 @@ export default function App() {
               ...prev,
               pointsCles: [...prev.pointsCles, "Nouveau point clé..."]
             }))}
-            onUpdateCardContent={(cardId, content) => updateCurrentCourse(prev => ({
-              ...prev,
-              cards: prev.cards.map(c => c.id === cardId ? { ...c, content } : c)
-            }))}
-            onDeleteCard={(cardId) => updateCurrentCourse(prev => ({
-              ...prev,
-              cards: prev.cards.filter(c => c.id !== cardId)
-            }))}
+            onUpdateCardContent={(cardId, content) => updateCurrentCourse(prev => {
+              if (sharedAccess && sharedAccess.permission === "Peut commenter") {
+                const card = prev.cards.find(c => c.id === cardId);
+                if (card && card.createdBy !== (activeProfile?.email || "guest@ideagrid.com")) {
+                  return prev;
+                }
+              }
+              return {
+                ...prev,
+                cards: prev.cards.map(c => c.id === cardId ? { ...c, content } : c)
+              };
+            })}
+            onDeleteCard={(cardId) => updateCurrentCourse(prev => {
+              if (sharedAccess && sharedAccess.permission === "Peut commenter") {
+                const card = prev.cards.find(c => c.id === cardId);
+                if (card && card.createdBy !== (activeProfile?.email || "guest@ideagrid.com")) {
+                  return prev;
+                }
+              }
+              return {
+                ...prev,
+                cards: prev.cards.filter(c => c.id !== cardId)
+              };
+            })}
             onPointerDown={handlePointerDown}
             draggingCard={draggingCard}
             onSave={handleSaveCourse}
             onShare={() => setActiveTab("partager")}
             activeProfile={activeProfile}
             onUpdateSwotBullet={handleUpdateSwotBullet}
+            // Collaboration properties
+            sharedAccess={sharedAccess}
+            onRefresh={handleRefreshSharedProfile}
+            onExitCollaboration={handleExitCollaboration}
+            onAddCommentCard={handleAddCommentCard}
           />
 
           {showAssistant && (

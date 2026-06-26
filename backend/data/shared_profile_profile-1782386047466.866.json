@@ -1,0 +1,43 @@
+{
+  "profileId": "profile-1782386047466.866",
+  "profile": {
+    "id": "profile-1782386047466.866",
+    "firstName": "leticia",
+    "lastName": "let",
+    "email": "liticia772.lh@gmail.com",
+    "color": "#3b82f6",
+    "lastActive": "Aujourd'hui à 15:24"
+  },
+  "courses": [
+    {
+      "id": "course-1782412540475.5671",
+      "title": "test",
+      "description": "Commencer à écrire ou parlez au micro...",
+      "descColor": "#2563eb",
+      "pointsCles": [
+        "Premier point clé..."
+      ],
+      "question": "Pourquoi ?",
+      "aiSummary": "L'assistant IA résumera le cours.",
+      "cards": []
+    },
+    {
+      "id": "photosynthesis-default",
+      "title": "La photosynthèse",
+      "description": "Commencer à écrire ou parlez au micro...",
+      "descColor": "#16a34a",
+      "pointsCles": [
+        "Les plantes absorbent la lumière",
+        "Elles utilisent le CO₂ et l'eau",
+        "Elles produisent du sucre",
+        "L'oxygène est rejeté dans l'air"
+      ],
+      "question": "Pourquoi la lumière est-elle essentielle à la photosynthèse ?",
+      "aiSummary": "La photosynthèse est le processus par lequel les plantes utilisent la lumière, le CO₂ et l'eau pour produire du sucre et libérer de l'oxygène.",
+      "cards": [],
+      "dateLabel": "Aujourd'hui",
+      "timeLabel": "10:45"
+    }
+  ],
+  "updatedAt": "2026-06-26T13:46:56.841Z"
+}
