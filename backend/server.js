@@ -139,7 +139,13 @@ app.get('/api/email-diagnostics', async (req, res) => {
   const smtpPort = process.env.SMTP_PORT;
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS ? 'configuré' : 'non défini';
-  const frontendUrl = process.env.FRONTEND_URL;
+  let frontendUrl = process.env.FRONTEND_URL;
+  if (frontendUrl) {
+    frontendUrl = frontendUrl.trim().replace(/\r?\n|\r/g, "");
+    if (!frontendUrl.startsWith('http://') && !frontendUrl.startsWith('https://')) {
+      frontendUrl = `https://${frontendUrl}`;
+    }
+  }
 
   const diagnostics = {
     env: {
@@ -228,8 +234,12 @@ L'équipe IdeaGrid`,
     };
 
     // 1. Try sending via Vercel Serverless API first if FRONTEND_URL is configured
-    const frontendUrl = process.env.FRONTEND_URL;
+    let frontendUrl = process.env.FRONTEND_URL;
     if (frontendUrl) {
+      frontendUrl = frontendUrl.trim().replace(/\r?\n|\r/g, "");
+      if (!frontendUrl.startsWith('http://') && !frontendUrl.startsWith('https://')) {
+        frontendUrl = `https://${frontendUrl}`;
+      }
       try {
         const targetUrl = `${frontendUrl.replace(/\/$/, '')}/api/send-email`;
         console.log(`Attempting to send email via Vercel API: ${targetUrl}`);

@@ -346,7 +346,7 @@ function AssistantPanel({ onClose, aiSummary, onSuggestAction, onSendMessage }) 
         </div>
 
         {/* Schéma généré */}
-        <div>
+        {/* <div>
           <p style={{ fontWeight: 600, fontSize: 13, color: "#0f172a", marginBottom: 8 }}>Schéma généré par l'IA</p>
           <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: "16px", display: "flex", flexDirection: "column", gap: 12, fontSize: 12, color: "#1e293b" }}>
             <div style={{ display: "flex", justifyContent: "space-around", alignItems: "center" }}>
@@ -364,7 +364,7 @@ function AssistantPanel({ onClose, aiSummary, onSuggestAction, onSendMessage }) 
               CO₂ ➔ <br /> H₂O ➔
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Suggestions */}
         <div>
@@ -475,7 +475,8 @@ function Whiteboard({
   sharedAccess,
   onRefresh,
   onExitCollaboration,
-  onAddCommentCard
+  onAddCommentCard,
+  onAddShapeCard
 }) {
   const isReadOnly = sharedAccess && sharedAccess.permission === "Peut consulter";
   const isCommentOnly = sharedAccess && sharedAccess.permission === "Peut commenter";
@@ -486,6 +487,7 @@ function Whiteboard({
   const [editingCardId, setEditingCardId] = useState(null);
   const [showToolbar, setShowToolbar] = useState(false);
   const [tempDesc, setTempDesc] = useState("");
+  const [selectedToolShape, setSelectedToolShape] = useState(null);
   
   const [editingSwotIdx, setEditingSwotIdx] = useState(null);
   const [tempSwotText, setTempSwotText] = useState("");
@@ -815,11 +817,24 @@ function Whiteboard({
         id="whiteboard-canvas-area"
         style={{ flex: 1, overflow: "auto", padding: "40px", display: "flex", justifyContent: "center", alignItems: "flex-start" }}
       >
-        <div style={{
-          width: "100%", maxWidth: 900, background: "white", borderRadius: 16, boxShadow: "0 4px 20px rgba(15,23,42,0.05)",
-          padding: "50px", minHeight: "850px", position: "relative", transform: `scale(${zoom / 100})`, transformOrigin: "top center", transition: "transform 0.15s ease",
-          overflow: "hidden"
-        }}>
+        <div 
+          id="whiteboard-page"
+          onClick={(e) => {
+            if (selectedToolShape && (e.target === e.currentTarget || e.target.id === "whiteboard-page")) {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const clickX = (e.clientX - rect.left) / (zoom / 100);
+              const clickY = (e.clientY - rect.top) / (zoom / 100);
+              onAddShapeCard(selectedToolShape, clickX - 80, clickY - 80);
+              setSelectedToolShape(null);
+            }
+          }}
+          style={{
+            width: "100%", maxWidth: 900, background: "white", borderRadius: 16, boxShadow: "0 4px 20px rgba(15,23,42,0.05)",
+            padding: "50px", minHeight: "850px", position: "relative", transform: `scale(${zoom / 100})`, transformOrigin: "top center", transition: "transform 0.15s ease",
+            overflow: "hidden",
+            cursor: selectedToolShape ? "crosshair" : "default"
+          }}
+        >
           
           {/* Collaboration Mode Banner */}
           {sharedAccess && (
@@ -1090,6 +1105,187 @@ function Whiteboard({
                                 sharedAccess.permission === "Peut modifier" || 
                                 (sharedAccess.permission === "Peut commenter" && card.createdBy === (activeProfile?.email || "guest@ideagrid.com"));
 
+            const isShape = card.type === "shape";
+            if (isShape) {
+              const size = {
+                w: card.width || (card.shape === "╱" ? 200 : 160),
+                h: card.height || (card.shape === "╱" ? 50 : 160)
+              };
+              
+              let padding = "16px";
+              if (card.shape === "◯") padding = "24px";
+              if (card.shape === "◇") padding = "28px";
+              if (card.shape === "△") padding = "40px 20px 16px 20px";
+              if (card.shape === "╱") padding = "0 8px";
+
+              const fillColor = (card.color || "#2563eb") + "0f";
+              const strokeColor = card.color || "#2563eb";
+
+              return (
+                <div
+                  key={card.id}
+                  onPointerDown={(e) => onPointerDown(e, card)}
+                  style={{
+                    position: "absolute",
+                    left: card.x,
+                    top: card.y,
+                    width: size.w,
+                    height: size.h,
+                    cursor: activeTab === "selectionner" && canEditCard ? "move" : "default",
+                    userSelect: "none",
+                    zIndex: isDragging ? 1000 : 10,
+                    pointerEvents: "auto",
+                    filter: "drop-shadow(0 4px 6px rgba(15,23,42,0.08))",
+                    transition: isDragging ? "none" : "transform 0.15s"
+                  }}
+                >
+                  <svg width={size.w} height={size.h} style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
+                    {card.shape === "⬜" && (
+                      <rect x="3" y="3" width={size.w - 6} height={size.h - 6} rx="12" stroke={strokeColor} strokeWidth="3" fill={fillColor} />
+                    )}
+                    {card.shape === "◯" && (
+                      <ellipse cx={size.w / 2} cy={size.h / 2} rx={(size.w - 6) / 2} ry={(size.h - 6) / 2} stroke={strokeColor} strokeWidth="3" fill={fillColor} />
+                    )}
+                    {card.shape === "◇" && (
+                      <polygon points={`${size.w/2},4 ${size.w-4},${size.h/2} ${size.w/2},${size.h-4} 4,${size.h/2}`} stroke={strokeColor} strokeWidth="3" fill={fillColor} />
+                    )}
+                    {card.shape === "△" && (
+                      <polygon points={`${size.w/2},6 ${size.w-6},${size.h-6} 6,${size.h-6}`} stroke={strokeColor} strokeWidth="3" fill={fillColor} />
+                    )}
+                    {card.shape === "╱" && (
+                      <line x1="10" y1={size.h / 2} x2={size.w - 10} y2={size.h / 2} stroke={strokeColor} strokeWidth="4" strokeLinecap="round" />
+                    )}
+                  </svg>
+
+                  {canDeleteCard && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onDeleteCard(card.id); }}
+                      style={{ 
+                        position: "absolute", top: -8, right: -8, 
+                        width: 20, height: 20, borderRadius: "50%", 
+                        background: "white", border: "1px solid #cbd5e1", 
+                        cursor: "pointer", color: "#64748b", fontSize: 10,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)", zIndex: 20
+                      }}
+                    >
+                      ✕
+                    </button>
+                  )}
+
+                  {card.shape === "╱" ? (
+                    <div style={{
+                      position: "absolute", top: -20, left: 0, width: "100%", textAlign: "center",
+                      fontSize: 12, color: strokeColor, fontWeight: "600", pointerEvents: "auto",
+                      fontFamily: "cursive, sans-serif"
+                    }}>
+                      {editingCardId === card.id && canEditCard ? (
+                        <input
+                          value={card.content}
+                          onChange={(e) => onUpdateCardContent(card.id, e.target.value)}
+                          onBlur={() => setEditingCardId(null)}
+                          autoFocus
+                          style={{
+                            width: "80%", border: "1px solid #cbd5e1", borderRadius: 4,
+                            fontSize: 11, padding: "2px 6px", outline: "none", textAlign: "center",
+                            background: "white"
+                          }}
+                        />
+                      ) : (
+                        <span 
+                          onClick={() => {
+                            if (!canEditCard) return;
+                            if (activeTab === "effacer") {
+                              onDeleteCard(card.id);
+                            } else {
+                              setEditingCardId(card.id);
+                            }
+                          }}
+                          style={{ cursor: canEditCard ? "pointer" : "default" }}
+                        >
+                          {card.content || "Ligne"}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{
+                      position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      padding: padding, boxSizing: "border-box", zIndex: 10, textAlign: "center"
+                    }}>
+                      {editingCardId === card.id && canEditCard ? (
+                        <textarea
+                          value={card.content}
+                          onChange={(e) => onUpdateCardContent(card.id, e.target.value)}
+                          onBlur={() => setEditingCardId(null)}
+                          autoFocus
+                          style={{
+                            width: "100%", height: "80%", border: "none", outline: "none",
+                            background: "transparent", fontSize: 13, resize: "none",
+                            textAlign: "center", color: "#1e293b", fontFamily: "cursive, sans-serif"
+                          }}
+                        />
+                      ) : (
+                        <p
+                          onClick={() => {
+                            if (!canEditCard) return;
+                            if (activeTab === "effacer") {
+                              onDeleteCard(card.id);
+                            } else {
+                              setEditingCardId(card.id);
+                            }
+                          }}
+                          style={{
+                            margin: 0, fontSize: 13, color: "#1e293b",
+                            fontFamily: "cursive, sans-serif", wordBreak: "break-word",
+                            maxHeight: "100%", overflow: "hidden", textOverflow: "ellipsis",
+                            cursor: canEditCard ? "pointer" : "default", width: "100%"
+                          }}
+                        >
+                          {card.content || "Cliquez pour écrire..."}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {canEditCard && (
+                    <div 
+                      onPointerDown={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        const rect = e.currentTarget.parentElement.getBoundingClientRect();
+                        setResizingCard({
+                          id: card.id,
+                          startWidth: size.w,
+                          startHeight: size.h,
+                          startX: (e.clientX - rect.left) / (zoom / 100),
+                          startY: (e.clientY - rect.top) / (zoom / 100)
+                        });
+                      }}
+                      style={{
+                        position: "absolute",
+                        bottom: 0,
+                        right: 0,
+                        width: 14,
+                        height: 14,
+                        cursor: "se-resize",
+                        zIndex: 30,
+                        background: "transparent",
+                        display: "flex",
+                        alignItems: "flex-end",
+                        justifyContent: "flex-end",
+                        padding: 2
+                      }}
+                    >
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                        <path d="M6 0 L8 0 L8 8 L0 8 L0 6 L4 6 L4 4 L6 4 Z" fill={strokeColor} opacity="0.5" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
             return (
               <div
                 key={card.id}
@@ -1238,15 +1434,27 @@ function Whiteboard({
 
           {/* Shapes Buttons */}
           <div style={{ display: "flex", gap: 4, fontSize: 16, color: "#64748b" }}>
-            {["⬜", "◯", "◇", "△", "╱"].map(shape => (
-              <button 
-                key={shape} 
-                onClick={() => alert(`Forme "${shape}" sélectionnée`)}
-                style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 8px", fontSize: 16 }}
-              >
-                {shape}
-              </button>
-            ))}
+            {["⬜", "◯", "◇", "△", "╱"].map(shape => {
+              const isSelected = selectedToolShape === shape;
+              return (
+                <button 
+                  key={shape} 
+                  onClick={() => setSelectedToolShape(isSelected ? null : shape)}
+                  style={{ 
+                    background: isSelected ? "#eff6ff" : "none", 
+                    border: isSelected ? "1px solid #bfdbfe" : "none", 
+                    borderRadius: 4,
+                    cursor: "pointer", 
+                    padding: "4px 8px", 
+                    fontSize: 16,
+                    transition: "all 0.15s"
+                  }}
+                  title={`Sélectionner la forme ${shape}`}
+                >
+                  {shape}
+                </button>
+              );
+            })}
           </div>
 
           <div style={{ width: 1, height: 24, background: "#e2e8f0" }} />
@@ -2735,18 +2943,18 @@ function HomeView({ profiles, activeProfileId, onSelectProfile, onOpenNewUserMod
 
 // ── New User Modal ─────────────────────────────────────────────────────────────
 function NewUserModal({ isOpen, onClose, onCreate }) {
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", color: "#22c55e" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", color: "#22c55e", password: "" });
 
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim()) {
-      alert("Veuillez remplir tous les champs.");
+    if (!form.firstName.trim() || !form.lastName.trim() || !form.email.trim() || !form.password.trim()) {
+      alert("Veuillez remplir tous les champs y compris le mot de passe.");
       return;
     }
     onCreate(form);
-    setForm({ firstName: "", lastName: "", email: "", color: "#22c55e" });
+    setForm({ firstName: "", lastName: "", email: "", color: "#22c55e", password: "" });
     onClose();
   };
 
@@ -2788,6 +2996,16 @@ function NewUserModal({ isOpen, onClose, onCreate }) {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="Ex: leticia.let@example.com"
+              style={{ width: "100%", padding: "10px 14px", border: "1px solid #cbd5e1", borderRadius: 8, outline: "none", fontSize: 13, color: "#0f172a" }}
+            />
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>Mot de passe</label>
+            <input 
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              placeholder="Ex: 1234"
               style={{ width: "100%", padding: "10px 14px", border: "1px solid #cbd5e1", borderRadius: 8, outline: "none", fontSize: 13, color: "#0f172a" }}
             />
           </div>
@@ -2841,6 +3059,83 @@ function NewUserModal({ isOpen, onClose, onCreate }) {
   );
 }
 
+// ── Password Prompt Modal ──────────────────────────────────────────────────────
+function PasswordPromptModal({ isOpen, profile, onClose, onSuccess }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  if (!isOpen || !profile) return null;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (password === profile.password) {
+      onSuccess();
+      setPassword("");
+      setError("");
+    } else {
+      setError("Mot de passe incorrect.");
+    }
+  };
+
+  return (
+    <ModalBackdrop onClose={onClose}>
+      <form onSubmit={handleSubmit} style={{
+        background: "white", width: 360, maxWidth: "95%", borderRadius: 16,
+        padding: 26, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)", border: "1px solid #cbd5e1"
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#0f172a" }}>
+            Saisir le mot de passe pour {profile.firstName}
+          </h3>
+          <button type="button" onClick={onClose} style={{ border: "none", background: "none", fontSize: 20, cursor: "pointer", color: "#94a3b8" }}>✕</button>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 20 }}>
+          <div>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 6 }}>Mot de passe</label>
+            <input 
+              type="password"
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setError(""); }}
+              placeholder="Entrez votre mot de passe"
+              style={{ width: "100%", padding: "10px 14px", border: "1px solid #cbd5e1", borderRadius: 8, outline: "none", fontSize: 13, color: "#0f172a" }}
+              autoFocus
+            />
+            {error && (
+              <div style={{ color: "#ef4444", fontSize: 12, marginTop: 6, fontWeight: 500 }}>
+                ⚠️ {error}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+          <button 
+            type="button"
+            onClick={onClose}
+            style={{
+              padding: "8px 16px", border: "1px solid #cbd5e1", borderRadius: 8,
+              background: "white", color: "#475569", fontSize: 13, fontWeight: 600, cursor: "pointer"
+            }}
+          >
+            Annuler
+          </button>
+          <button 
+            type="submit"
+            style={{
+              padding: "8px 18px", border: "none", borderRadius: 8,
+              background: profile.color || "#3b82f6", color: "white", fontSize: 13, fontWeight: 700, cursor: "pointer",
+              boxShadow: "0 2px 4px rgba(0,0,0,0.15)"
+            }}
+          >
+            Valider
+          </button>
+        </div>
+      </form>
+    </ModalBackdrop>
+  );
+}
+
 // ── App Container ─────────────────────────────────────────────────────────────
 export default function App() {
   const [profiles, setProfiles] = useState(() => getProfiles());
@@ -2857,6 +3152,9 @@ export default function App() {
   // Modals visibility
   const [showShare, setShowShare] = useState(false);
   const [showNewUserModal, setShowNewUserModal] = useState(false);
+  const [profileToAuthenticate, setProfileToAuthenticate] = useState(null);
+  const [selectedToolShape, setSelectedToolShape] = useState(null);
+  const [resizingCard, setResizingCard] = useState(null);
 
   // Speech Recognition States
   const [isRecording, setIsRecording] = useState(false);
@@ -3250,6 +3548,26 @@ export default function App() {
   };
 
   const handlePointerMove = (e) => {
+    if (resizingCard) {
+      const board = document.getElementById("whiteboard-canvas-area");
+      if (!board) return;
+      const rect = board.getBoundingClientRect();
+      const currentX = (e.clientX - rect.left) / (zoom / 100);
+      const currentY = (e.clientY - rect.top) / (zoom / 100);
+      
+      const deltaX = currentX - resizingCard.startX;
+      const deltaY = currentY - resizingCard.startY;
+      
+      const newWidth = Math.max(80, resizingCard.startWidth + deltaX);
+      const newHeight = Math.max(40, resizingCard.startHeight + deltaY);
+      
+      updateCurrentCourse(prev => ({
+        ...prev,
+        cards: prev.cards.map(c => c.id === resizingCard.id ? { ...c, width: newWidth, height: newHeight } : c)
+      }));
+      return;
+    }
+
     if (!draggingCard) return;
     const board = document.getElementById("whiteboard-canvas-area");
     if (!board) return;
@@ -3265,6 +3583,7 @@ export default function App() {
 
   const handlePointerUp = () => {
     setDraggingCard(null);
+    setResizingCard(null);
   };
 
   // Assistant chatbot submits
@@ -3348,6 +3667,7 @@ export default function App() {
       lastName: formData.lastName,
       email: formData.email,
       color: formData.color,
+      password: formData.password || "",
       lastActive: "Aujourd'hui à " + new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
     };
     
@@ -3381,13 +3701,18 @@ export default function App() {
           profiles={profiles}
           activeProfileId={activeProfileId}
           onSelectProfile={(id) => {
-            setActiveProfileId(id);
-            const now = new Date();
-            const timeStr = "Aujourd'hui à " + now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-            const updated = profiles.map(p => p.id === id ? { ...p, lastActive: timeStr } : p);
-            setProfiles(updated);
-            saveProfiles(updated);
-            setActiveTab("ecrire"); // Open board automatically
+            const p = profiles.find(prof => prof.id === id);
+            if (p && p.password) {
+              setProfileToAuthenticate(p);
+            } else {
+              setActiveProfileId(id);
+              const now = new Date();
+              const timeStr = "Aujourd'hui à " + now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+              const updated = profiles.map(prof => prof.id === id ? { ...prof, lastActive: timeStr } : prof);
+              setProfiles(updated);
+              saveProfiles(updated);
+              setActiveTab("ecrire"); // Open board automatically
+            }
           }}
           onOpenNewUserModal={() => setShowNewUserModal(true)}
         />
@@ -3450,6 +3775,29 @@ export default function App() {
                 color: selectedColor
               };
               updateCurrentCourse(prev => ({ ...prev, cards: [...prev.cards, newCard] }));
+            }}
+            onAddShapeCard={(shape, x, y) => {
+              const shapeNames = {
+                "⬜": "Carré",
+                "◯": "Cercle",
+                "◇": "Losange",
+                "△": "Triangle",
+                "╱": "Ligne"
+              };
+              const posX = x !== undefined ? x : 350 + Math.random() * 80;
+              const posY = y !== undefined ? y : 200 + Math.random() * 80;
+              const newCard = {
+                id: genId(),
+                type: "shape",
+                shape: shape,
+                title: shapeNames[shape] || "Forme",
+                content: "Écrire ici...",
+                x: posX,
+                y: posY,
+                isPinned: false,
+                color: selectedColor
+              };
+              updateCurrentCourse(prev => ({ ...prev, cards: [...(prev.cards || []), newCard] }));
             }}
             onUpdateTitle={(title) => updateCurrentCourse({ title })}
             onUpdateDesc={(description) => updateCurrentCourse({ description })}
@@ -3519,6 +3867,24 @@ export default function App() {
         isOpen={showNewUserModal}
         onClose={() => setShowNewUserModal(false)}
         onCreate={handleCreateNewUser}
+      />
+
+      {/* Password Authentication Dialog */}
+      <PasswordPromptModal 
+        isOpen={profileToAuthenticate !== null}
+        profile={profileToAuthenticate}
+        onClose={() => setProfileToAuthenticate(null)}
+        onSuccess={() => {
+          const p = profileToAuthenticate;
+          setProfileToAuthenticate(null);
+          setActiveProfileId(p.id);
+          const now = new Date();
+          const timeStr = "Aujourd'hui à " + now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+          const updated = profiles.map(prof => prof.id === p.id ? { ...prof, lastActive: timeStr } : prof);
+          setProfiles(updated);
+          saveProfiles(updated);
+          setActiveTab("ecrire");
+        }}
       />
 
       {/* Toast Notification */}
